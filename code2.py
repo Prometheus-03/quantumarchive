@@ -32,7 +32,7 @@ class REPL():
     @commands.command(name='exec')
     async def _eval(self, ctx, *, body: str):
         '''for bot owner to execute statements'''
-        if ctx.author.id != ownerid:
+        if ctx.author.id not in ownerid:
             return
         env = {
             'bot': self.bot,
@@ -79,7 +79,7 @@ class REPL():
     @commands.command()
     async def repl(self, ctx):
         '''for bot owner to run series of commands'''
-        if ctx.author.id != ownerid:
+        if ctx.author.id not in ownerid:
             return
         msg = ctx.message
         variables = {
