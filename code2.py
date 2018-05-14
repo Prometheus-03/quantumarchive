@@ -9,7 +9,7 @@ import inspect
 import textwrap
 from contextlib import redirect_stdout
 import io
-ownerid = 360022804357185537
+ownerid = [360022804357185537, 315728369369088003]
  
 class REPL():
  
