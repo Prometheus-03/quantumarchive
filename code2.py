@@ -72,7 +72,7 @@ class REPL():
             else:
                 self._last_result = ret
                 sendable=str(value)+str(ret)
-            for i in range(len(sendable)//1900):
+            for i in range(len(sendable)//1900+1):
                 await ctx.send('```py\n'+sendable[i*1990:(i+1)*1990]+'\n```')
             await ctx.send('```py\n'''+sendable[len(sendable)//1990:]+'\n```')
  
