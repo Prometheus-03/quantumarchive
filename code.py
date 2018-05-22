@@ -76,7 +76,7 @@ class General:
         res = msg.created_at - ctx.message.created_at
         res = tdm(res)
         lat = bot.latency*1000
-        await msg.edit(content='Pong! :ping_pong: Bot response time: %f ms\nDiscord latency: %.1f ms'%(res,lat))
+        await msg.edit(content='Pong! :ping_pong: Bot response time: {}ms\nDiscord latency: {}ms'.format(res,round(lat,1)))
  
     @commands.command()
     async def say(self, ctx, *, something='Quantum Bot here!!'):
