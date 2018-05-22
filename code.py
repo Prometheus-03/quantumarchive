@@ -237,21 +237,6 @@ class Fun:
             total.append(random.randint(1, 6))
         botmessage = (('Numbers:' + ','.join([str(i) for i in total])) + '\nTheir sum:') + str(sum(total))
         await ctx.send(botmessage)
-
-    @commands.group()
-    async def emoji(self,ctx):
-        '''gets the emojis that you like'''
-        choices="**thinking**: List of all thinking emotes\n**loading**: List of all loading emotes\n**laughing**: List of all laughing emotes"
-        embed=discord.Embed(title="List of emojis you can use",description=choices)
-        await ctx.send(embed=embed)
-
-    @emoji.group()
-    async def thinking(self,ctx):
-        '''list of all thinking emojis'''
-        choices="**ragethink**: An angry thinking face\n**3dthink**: A 3d rotating thinking face\n**fidgetthink**: A fidgetspinner crossed over with a thinking face\n**whatsappthink**: The thinking face from Whatsapp\n**blobthink**: A blob is thinking\n**puffthink**: Watch puffdip think\n**thonkcool**: Feel cool and thonk aloud\n**thonk**: Just plainly thonking"
-        #387501274930741249,think3d,fidgetthinkthinkingfacewassap,BlobThinking,puffthink,thonkcool,thonk
-        embed=discord.Embed(title="List of emojis under class [thinking]",description=choices)
-        await ctx.send(embed=embed)
         
     @commands.command()
     async def think(self,ctx):
