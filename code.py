@@ -1,5 +1,3 @@
-
-
 import asyncio,discord,math,random,time,datetime,aiohttp,functools,inspect,re
 from discord.ext import commands
 import urllib.request
@@ -238,6 +236,15 @@ class Fun:
         botmessage = (('Numbers:' + ','.join([str(i) for i in total])) + '\nTheir sum:') + str(sum(total))
         await ctx.send(botmessage)
         
+    @commands.command()
+    async def xkcd(num=None):
+        if num is None:num=random.randint(1,10000)
+        url = f'https://xkcd.com/{num}/info.0.json'
+        async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            source = await response.json(encoding='utf8')
+        await ctx.send(source)
+
     @commands.command()
     async def think(self,ctx):
         '''let the bot think for a while'''
