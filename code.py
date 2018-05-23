@@ -239,16 +239,31 @@ class Fun:
     @commands.command()
     async def xkcd(self, ctx, num=None):
         '''read the famous comic strip'''
-        if num is None:num=random.randint(1,1996)
-        url = f'https://xkcd.com/{num}/info.0.json'
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url) as response:
-                f = await response.json(encoding='utf8')
-        m=discord.Embed(colour=discord.Color.from_rgb(245,245,220),title="xkcd #{}:{}".format(str(f['num']),f['safe_title']),description=f['transcript'],timestamp=datetime.datetime.now())
-        m.set_image(url=f['img'])
-        m.add_field(name="Links",value=f['img']+'\nhttps://xkcd.com/'+str(f['num']))
-        m.add_field(name="Publication date:",value=f['day']+'/'+f['month']+'/'+f['year'],inline=False)
-        await ctx.send(embed=m)
+        try:
+            async with ctx.typing():
+                if num is None:num=random.randint(1,1996)
+                url = f'https://xkcd.com/{num}/info.0.json'
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(url) as response:
+                        f = await response.json(encoding='utf8')
+                m=discord.Embed(colour=discord.Color.from_rgb(245,245,220),title="xkcd #{}:{}".format(str(f['num']),f['safe_title']),description=f['transcript'],timestamp=datetime.datetime.now())
+                m.set_image(url=f['img'])
+                m.add_field(name="Links",value=f['img']+'\nhttps://xkcd.com/'+str(f['num']))
+                m.add_field(name="Publication date:",value=f['day']+'/'+f['month']+'/'+f['year'],inline=False)
+            await ctx.send(embed=m)
+        except:
+            await ctx.send("Fetching your a random xkcd comic...",delete_after=2)
+            async with ctx.typing():
+                num=random.randint(1,1996)
+                url = f'https://xkcd.com/{num}/info.0.json'
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(url) as response:
+                        f = await response.json(encoding='utf8')
+                m=discord.Embed(colour=discord.Color.from_rgb(245,245,220),title="xkcd #{}:{}".format(str(f['num']),f['safe_title']),description=f['transcript'],timestamp=datetime.datetime.now())
+                m.set_image(url=f['img'])
+                m.add_field(name="Links",value=f['img']+'\nhttps://xkcd.com/'+str(f['num']))
+                m.add_field(name="Publication date:",value=f['day']+'/'+f['month']+'/'+f['year'],inline=False)
+            await ctx.send(embed=m)
 
     @commands.command()
     async def think(self,ctx):
