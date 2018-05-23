@@ -237,7 +237,7 @@ class Fun:
         await ctx.send(botmessage)
         
     @commands.command()
-    async def xkcd(self, ctx, num=None):
+    async def xkcd(self, ctx, num:int=None):
         '''read the famous comic strip'''
         try:
             async with ctx.typing():
