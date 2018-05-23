@@ -252,7 +252,9 @@ class Fun:
                 m.add_field(name="Publication date:",value=f['day']+'/'+f['month']+'/'+f['year'],inline=False)
             await ctx.send(embed=m)
         except:
-            if num=404:await ctx.send("Think again, does it exist?")
+            if num=404:
+                m=discord.Embed(title="xkcd #404: Think again, does it exist?")
+                m.set_image(url='https://www.explainxkcd.com/wiki/images/9/92/not_found.png')
             else:
                 await ctx.send("Fetching your a random xkcd comic...",delete_after=2)
                 async with ctx.typing():
@@ -265,7 +267,7 @@ class Fun:
                     m.set_image(url=f['img'])
                     m.add_field(name="Links",value=f['img']+'\nhttps://xkcd.com/'+str(f['num']))
                     m.add_field(name="Publication date:",value=f['day']+'/'+f['month']+'/'+f['year'],inline=False)
-                await ctx.send(embed=m)
+            await ctx.send(embed=m)
 
     @commands.command()
     async def think(self,ctx):
