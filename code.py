@@ -237,7 +237,7 @@ class Fun:
         await ctx.send(botmessage)
         
     @commands.command()
-    async def xkcd(num=None):
+    async def xkcd(self, ctx,num=None):
         if num is None:num=random.randint(1,10000)
         url = f'https://xkcd.com/{num}/info.0.json'
         async with aiohttp.ClientSession() as session:
