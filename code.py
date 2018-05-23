@@ -241,8 +241,8 @@ class Fun:
         if num is None:num=random.randint(1,10000)
         url = f'https://xkcd.com/{num}/info.0.json'
         async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
-            source = await response.json(encoding='utf8')
+            async with session.get(url) as response:
+                source = await response.json(encoding='utf8')
         await ctx.send(source)
 
     @commands.command()
