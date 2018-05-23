@@ -253,7 +253,7 @@ class Fun:
             await ctx.send(embed=m)
         except:
             if num=404:
-                m=discord.Embed(title="xkcd #404: Think again, does it exist?")
+                m=discord.Embed(title="xkcd #404: Think again, does it exist?",description="This came between Monday and Wednesday, 2 consecutive days of xkcd comic publication. This can be considered an April Fools prank or a reference to the 404 Error: Not Found")
                 m.set_image(url='https://www.explainxkcd.com/wiki/images/9/92/not_found.png')
             else:
                 await ctx.send("Fetching your a random xkcd comic...",delete_after=2)
