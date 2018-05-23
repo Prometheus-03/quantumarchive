@@ -237,13 +237,18 @@ class Fun:
         await ctx.send(botmessage)
         
     @commands.command()
-    async def xkcd(self, ctx,num=None):
-        if num is None:num=random.randint(1,10000)
+    async def xkcd(self, ctx, num=None):
+        '''read the famous comic strip'''
+        if num is None:num=random.randint(1,1996)
         url = f'https://xkcd.com/{num}/info.0.json'
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as response:
-                source = await response.json(encoding='utf8')
-        await ctx.send(source)
+                f = await response.json(encoding='utf8')
+        m=discord.Embed(title="xkcd #{}:{}".format(str(f['num']),f['safe_title']),description=f['transcript'],timestamp=datetime.datetime.now())
+        m.set_image(url=f['img'])
+        m.add_field(name="Links",value=f['img']+'\nhttps://xkcd.com/'+str(f['num']))
+        m.add_field(name="Publication date:",value=f['day']+'/'+f['month']+'/'+f['year'],inline=False)
+        await ctx.send(embed=m)
 
     @commands.command()
     async def think(self,ctx):
