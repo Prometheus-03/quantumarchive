@@ -444,13 +444,13 @@ async def on_member_join(member):
     if member.guild.id==413290013254615041:
         embed=discord.Embed(title="Member join",description="Welcome to the server, "+member.name+"! Please read the rules in "+member.guild.get_channel(444443837482532867).mention+" before you proceed :)",colour=discord.Colour.from_rgb(87,242,87))
         embed.set_thumbnail(url=member.avatar_url)
-        await member.guild.get_channel(413290013254615041).send(embed=embed)
+        await member.guild.get_channel(413303508289454081).send(embed=embed)
 
 @bot.event
 async def on_member_leave(member):
     if member.guild.id==413290013254615041:
         embed=discord.Embed(title="Member leave",description="We're sad to see you leave, "+member.name+"! We wish you could return :)",colour=discord.Colour.from_rgb(242,23,33))
         embed.set_thumbnail(url=member.avatar_url)
-        await member.guild.get_channel(413290013254615041).send(embed=embed)
+        await member.guild.get_channel(413303508289454081).send(embed=embed)
 bot.run('Mzg0NjIzOTc4MDI4ODU5Mzky.DZecOA.rekvrUSZL8q9QVzlIlnoS0lNYVI')
 #ok
