@@ -10,7 +10,7 @@ def tdm(td):
 owner_id=360022804357185537
 bot_id=384623978028859392
 prefixes=('q!', 'q>', 'q<', 'q+', 'q-', 'q*', 'q/', 'q?', 'q.', 'q,', 'q:', 'q;','Q!', 'Q>', 'Q<', 'Q+', 'Q-', 'Q*', 'Q/', 'Q?', 'Q.', 'Q,', 'Q:', 'Q;', 'quantum ', 'quantuM ', 'quantUm ', 'quantUM ', 'quanTum ', 'quanTuM ', 'quanTUm ', 'quanTUM ', 'quaNtum ', 'quaNtuM ', 'quaNtUm ', 'quaNtUM ', 'quaNTum ', 'quaNTuM ', 'quaNTUm ', 'quaNTUM ', 'quAntum ', 'quAntuM ', 'quAntUm ', 'quAntUM ', 'quAnTum ', 'quAnTuM ', 'quAnTUm ', 'quAnTUM ', 'quANtum ', 'quANtuM ', 'quANtUm ', 'quANtUM ', 'quANTum ', 'quANTuM ', 'quANTUm ', 'quANTUM ', 'qUantum ', 'qUantuM ', 'qUantUm ', 'qUantUM ', 'qUanTum ', 'qUanTuM ', 'qUanTUm ', 'qUanTUM ', 'qUaNtum ', 'qUaNtuM ', 'qUaNtUm ', 'qUaNtUM ', 'qUaNTum ', 'qUaNTuM ', 'qUaNTUm ', 'qUaNTUM ', 'qUAntum ', 'qUAntuM ', 'qUAntUm ', 'qUAntUM ', 'qUAnTum ', 'qUAnTuM ', 'qUAnTUm ', 'qUAnTUM ', 'qUANtum ', 'qUANtuM ', 'qUANtUm ', 'qUANtUM ', 'qUANTum ', 'qUANTuM ', 'qUANTUm ', 'qUANTUM ', 'Quantum ', 'QuantuM ', 'QuantUm ', 'QuantUM ', 'QuanTum ', 'QuanTuM ', 'QuanTUm ', 'QuanTUM ', 'QuaNtum ', 'QuaNtuM ', 'QuaNtUm ', 'QuaNtUM ', 'QuaNTum ', 'QuaNTuM ', 'QuaNTUm ', 'QuaNTUM ', 'QuAntum ', 'QuAntuM ', 'QuAntUm ', 'QuAntUM ', 'QuAnTum ', 'QuAnTuM ', 'QuAnTUm ', 'QuAnTUM ', 'QuANtum ', 'QuANtuM ', 'QuANtUm ', 'QuANtUM ', 'QuANTum ', 'QuANTuM ', 'QuANTUm ', 'QuANTUM ', 'QUantum ', 'QUantuM ', 'QUantUm ', 'QUantUM ', 'QUanTum ', 'QUanTuM ', 'QUanTUm ', 'QUanTUM ', 'QUaNtum ', 'QUaNtuM ', 'QUaNtUm ', 'QUaNtUM ', 'QUaNTum ', 'QUaNTuM ', 'QUaNTUm ', 'QUaNTUM ', 'QUAntum ', 'QUAntuM ', 'QUAntUm ', 'QUAntUM ', 'QUAnTum ', 'QUAnTuM ', 'QUAnTUm ', 'QUAnTUM ', 'QUANtum ', 'QUANtuM ', 'QUANtUm ', 'QUANtUM ', 'QUANTum ', 'QUANTuM ', 'QUANTUm ', 'QUANTUM ')
-bot = commands.Bot(description='Tune in to lots of fun with this bot!', command_prefix=prefixes)
+bot = commands.Bot(description='Tune in to lots of fun with this bot!', command_prefix=commands.when_mentioned_or(*prefixes))
 class Math:
     '''for mathematical fun'''
     @commands.command()
@@ -37,6 +37,20 @@ class Math:
                     await ctx.send(embed=discord.Embed(title="%d! is equal to..."%num,description=str(math.factorial(num))))
             except Exception as p:
                     await ctx.send(embed=discord.Embed(title=type(p)+" raised!",description=p.args[1]))
+
+    @commands.command()
+    async def collatz(self,ctx,num:int):
+        '''dedicated to the famous conjecture, will return the steps from input to 1'''
+        nums=[num]
+        last=num
+        while last>1:
+            if last%2==0:last//=2
+            else:last=last*3+1
+            nums.append(last)
+        nums=list(map(str,nums))
+        ranhex=random.randint(0,255)
+        await ctx.send(embed=discord.Embed(title="Collatzing your way through %d"%num,description=",".join(nums),colour=discord.Colour.from_rgb(ranhex,ranhex,ranhex)))
+        
 class Admin:
     '''for administrative purposes'''
     @commands.command()
@@ -74,7 +88,7 @@ class General:
         res = msg.created_at - ctx.message.created_at
         res = tdm(res)
         lat = bot.latency*1000
-        await msg.edit(content='Pong! :ping_pong: Bot response time: {}ms\nDiscord latency: {}ms'.format(res,round(lat,1)))
+        await msg.edit(content='Pong! :ping_pong:\nBot response time: {}ms\nDiscord latency: {}ms'.format(res,round(lat,1)))
  
     @commands.command()
     async def say(self, ctx, *, something='Quantum Bot here!!'):
@@ -116,8 +130,8 @@ class Information:
     @commands.command()
     async def prefix(self, ctx):
         '''list of all prefixes my bot uses'''
-        await ctx.send("```"+",".join(prefixes)+"```")
-        await ctx.send(str(len(prefixes))+" prefixes! :joy:")
+        prefixlist=tuple(["@Quantum Bot"]+list(prefixes))
+        await ctx.send("```"+",".join(list(prefixlist))+"```"+'\n'+str(len(prefixlist))+" prefixes! :joy:")
  
     @commands.command()
     async def invite(self, ctx):
@@ -235,39 +249,6 @@ class Fun:
             total.append(random.randint(1, 6))
         botmessage = (('Numbers:' + ','.join([str(i) for i in total])) + '\nTheir sum:') + str(sum(total))
         await ctx.send(botmessage)
-        
-    @commands.command()
-    async def xkcd(self, ctx, num:int=None):
-        '''read the famous comic strip'''
-        try:
-            async with ctx.typing():
-                if num is None:num=random.randint(1,1996)
-                url = f'https://xkcd.com/{num}/info.0.json'
-                async with aiohttp.ClientSession() as session:
-                    async with session.get(url) as response:
-                        f = await response.json(encoding='utf8')
-                m=discord.Embed(colour=discord.Color.from_rgb(245,245,220),title="xkcd #{}:{}".format(str(f['num']),f['safe_title']),description=f['transcript'],timestamp=datetime.datetime.now())
-                m.set_image(url=f['img'])
-                m.add_field(name="Links",value=f['img']+'\nhttps://xkcd.com/'+str(f['num']))
-                m.add_field(name="Publication date:",value=f['day']+'/'+f['month']+'/'+f['year'],inline=False)
-            await ctx.send(embed=m)
-        except:
-            if num==404:
-                m=discord.Embed(title="xkcd #404: Think again, does it exist?",description="This came between Monday and Wednesday, 2 consecutive days of xkcd comic publication. This can be considered an April Fools prank or a reference to the 404 Error: Not Found")
-                m.set_image(url='https://www.explainxkcd.com/wiki/images/9/92/not_found.png')
-            else:
-                await ctx.send("Fetching your a random xkcd comic...",delete_after=2)
-                async with ctx.typing():
-                    num=random.randint(1,1996)
-                    url = f'https://xkcd.com/{num}/info.0.json'
-                    async with aiohttp.ClientSession() as session:
-                        async with session.get(url) as response:
-                            f = await response.json(encoding='utf8')
-                    m=discord.Embed(colour=discord.Color.from_rgb(245,245,220),title="xkcd #{}:{}".format(str(f['num']),f['safe_title']),description=f['transcript'],timestamp=datetime.datetime.now())
-                    m.set_image(url=f['img'])
-                    m.add_field(name="Links",value=f['img']+'\nhttps://xkcd.com/'+str(f['num']))
-                    m.add_field(name="Publication date:",value=f['day']+'/'+f['month']+'/'+f['year'],inline=False)
-            await ctx.send(embed=m)
 
     @commands.command()
     async def think(self,ctx):
@@ -417,6 +398,40 @@ class Media:
                     content.append(url)
             await ctx.send(embed=discord.Embed(title="'%s' search results:'"%anything,description="\n".join(content),colour=discord.Colour.from_rgb(66, 133, 244)))
 
+    @commands.command()
+    async def xkcd(self, ctx, num:int=None):
+        '''read the famous comic strip'''
+        try:
+            async with ctx.typing():
+                if num is None:num=random.randint(1,1996)
+                url = f'https://xkcd.com/{num}/info.0.json'
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(url) as response:
+                        f = await response.json(encoding='utf8')
+                m=discord.Embed(colour=discord.Color.from_rgb(245,245,220),title="xkcd #{}:{}".format(str(f['num']),f['safe_title']),description=f['transcript'],timestamp=datetime.datetime.now())
+                m.set_image(url=f['img'])
+                m.add_field(name="Links",value=f['img']+'\nhttps://xkcd.com/'+str(f['num']))
+                m.add_field(name="Publication date:",value=f['day']+'/'+f['month']+'/'+f['year'],inline=False)
+            await ctx.send(embed=m)
+        except:
+            if num==404:
+                m=discord.Embed(title="xkcd #404: Think again, does it exist?",description="This came between Monday and Wednesday, 2 consecutive days of xkcd comic publication. This can be considered an April Fools prank or a reference to the 404 Error: Not Found")
+                m.set_image(url='https://www.explainxkcd.com/wiki/images/9/92/not_found.png')
+            else:
+                await ctx.send("Fetching your a random xkcd comic...",delete_after=2)
+                async with ctx.typing():
+                    num=random.randint(1,1996)
+                    url = f'https://xkcd.com/{num}/info.0.json'
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get(url) as response:
+                            f = await response.json(encoding='utf8')
+                    m=discord.Embed(colour=discord.Color.from_rgb(245,245,220),title="xkcd #{}:{}".format(str(f['num']),f['safe_title']),description=f['transcript'],timestamp=datetime.datetime.now())
+                    m.set_image(url=f['img'])
+                    m.add_field(name="Links",value=f['img']+'\nhttps://xkcd.com/'+str(f['num']))
+                    m.add_field(name="Publication date:",value=f['day']+'/'+f['month']+'/'+f['year'],inline=False)
+            await ctx.send(embed=m)
+# everything from here onwards are bot events
+
 @bot.event
 async def on_ready():
     bot.remove_command('help')
@@ -432,9 +447,9 @@ async def on_ready():
     f=bot.get_guild(413290013254615041).get_channel(436548366088798219)
     await f.send(embed=discord.Embed(title="Bot reawakened at: ",description=f"{datetime.datetime.now(): %B %d, %Y at %H:%M:%S GMT}"))
     async def change_activities():
-        timeout = 10 #Here you can change the delay between changes 
+        timeout = 5 #Here you can change the delay between changes 
         while True:
-            possb='Type [{}help] for help'.format(random.choice(bot.command_prefix))
+            possb='Type [{}help] for help'.format(random.choice(prefixes))
             await bot.change_presence(activity=discord.Game(possb,status=discord.Status.dnd))
             await asyncio.sleep(timeout)
     bot.loop.create_task(change_activities())
@@ -449,6 +464,7 @@ async def on_member_join(member):
         embed=discord.Embed(title="Member join",description="Welcome to sebi's bot tutorial server, "+member.name+"! Please read the rules in "+member.guild.get_channel(384663295287623680).mention+" before you proceed :)",colour=discord.Colour.from_rgb(87,242,87))
         embed.set_thumbnail(url=member.avatar_url)
         await member.guild.get_channel(426860084161937410).send(embed=embed)
+        
 @bot.event
 async def on_member_remove(member):
     if member.guild.id==413290013254615041:
@@ -460,5 +476,9 @@ async def on_member_remove(member):
         embed.set_thumbnail(url=member.avatar_url)
         await member.guild.get_channel(413303508289454081).send(embed=embed)
 
+@bot.event
+async def on_command_error(ctx,error):
+    embed=discord.Embed(title=str(type(error))[8:-2],description=str(error),colour=discord.Colour.from_rgb(random.randint(0,255),random.randint(0,255),random.randint(0,255)))
+    await ctx.send("***Roses are red, violets are blue, there is an error when the command is used by you***",embed=embed,delete_after=15)
 bot.run('Mzg0NjIzOTc4MDI4ODU5Mzky.DZecOA.rekvrUSZL8q9QVzlIlnoS0lNYVI')
 #ok
