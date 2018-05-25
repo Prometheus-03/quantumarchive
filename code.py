@@ -459,10 +459,14 @@ async def on_member_join(member):
     if member.guild.id==413290013254615041:
         embed=discord.Embed(title="Member join",description="Welcome to Quantum Bot and Pegasus server, "+member.name+"! Please read the rules in "+member.guild.get_channel(444443837482532867).mention+" before you proceed :)",colour=discord.Colour.from_rgb(87,242,87))
         embed.set_thumbnail(url=member.avatar_url)
+        embed.add_field(name="Bot",value=member.bot)
+        embed.add_field(name="Member id",value=member.id)
         await member.guild.get_channel(413303508289454081).send(embed=embed)
     elif member.guild.id==265828729970753537:
         embed=discord.Embed(title="Member join",description="Welcome to sebi's bot tutorial server, "+member.name+"! Please read the rules in "+member.guild.get_channel(384663295287623680).mention+" before you proceed :)",colour=discord.Colour.from_rgb(87,242,87))
         embed.set_thumbnail(url=member.avatar_url)
+        embed.add_field(name="Bot",value=member.bot)
+        embed.add_field(name="Member id",value=member.id)
         await member.guild.get_channel(426860084161937410).send(embed=embed)
         
 @bot.event
@@ -470,11 +474,15 @@ async def on_member_remove(member):
     if member.guild.id==413290013254615041:
         embed=discord.Embed(title="Member leave",description="We're sad to see you leave, "+member.name+"! We wish you could return :(",colour=discord.Colour.from_rgb(242,23,33))
         embed.set_thumbnail(url=member.avatar_url)
+        embed.add_field(name="Bot",value=member.bot)
+        embed.add_field(name="Member id",value=member.id)
         await member.guild.get_channel(413303508289454081).send(embed=embed)
     elif member.guild.id==265828729970753537:
         embed=discord.Embed(title="Member leave",description="We're sad to see you leave, "+member.name+"! We wish you could return :(",colour=discord.Colour.from_rgb(242,23,33))
         embed.set_thumbnail(url=member.avatar_url)
-        await member.guild.get_channel(413303508289454081).send(embed=embed)
+        embed.add_field(name="Bot",value=member.bot)
+        embed.add_field(name="Member id",value=member.id)
+        await member.guild.get_channel(426860084161937410).send(embed=embed)
 
 @bot.event
 async def on_command_error(ctx,error):
