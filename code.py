@@ -79,6 +79,11 @@ class Admin:
             await ctx.message.add_reaction('\u2705')
         except:
             await ctx.message.add_reaction('\u274C')
+
+    @commands.command(hidden=True)
+    async def pegasus(self,ctx):
+        await bot.get_guild(413290013254615041).get_channel(413290013778771969).send(embed=discord.Embed(title="Pegasus birthday event winner",description=ctx.author.name+" found the mysterious command! He/she has won Pegasus's challenge!"))
+        
 class General:
     '''commands available for everyone'''           
     @commands.command(pass_context=True)
