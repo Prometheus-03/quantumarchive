@@ -492,8 +492,8 @@ async def on_command_error(ctx,error):
 
 @bot.event
 async def on_message(message):
-    if message.content.lower=="winner":
-        await bot.get_guild(413290013254615041).get_channel(413290013778771969).send(embed=discord.Embed(title="Pegasus birthday event winner",description=ctx.author.name+" found the mysterious command! He/she has won Pegasus's challenge!"))
+    if message.content.lower()=="bday15":
+        await bot.get_guild(413290013254615041).get_channel(413290013778771969).send(embed=discord.Embed(title="Pegasus birthday event winner",description=message.author.name+" found the keyword! He/she has won Pegasus's challenge!"))
     await bot.process_commands(message)
 bot.run('Mzg0NjIzOTc4MDI4ODU5Mzky.DZecOA.rekvrUSZL8q9QVzlIlnoS0lNYVI')
 #ok
