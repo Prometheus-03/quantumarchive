@@ -492,5 +492,7 @@ async def on_command_error(ctx,error):
 
 @bot.event
 async def on_message(message):
+        #add stuff here when you want to
+        await bot.process_commands(message)
 bot.run('Mzg0NjIzOTc4MDI4ODU5Mzky.DZecOA.rekvrUSZL8q9QVzlIlnoS0lNYVI')
 #ok
