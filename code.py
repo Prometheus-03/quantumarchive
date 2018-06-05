@@ -210,6 +210,7 @@ Server Region:{}\nMember count:{}\nOwner:{}\nCreated On:{}\nVerification Level={
         '''bot help message'''
         command_list={}
         message={}
+        embeds=[]
         for i in bot.cogs.keys():
                 if i!='REPL':command_list.update({i:(m for m in dir(bot.get_cog(i))[26:])})
                 else:command_list.update({'REPL':('exec','repl')})
@@ -218,8 +219,50 @@ Server Region:{}\nMember count:{}\nOwner:{}\nCreated On:{}\nVerification Level={
                 message.update({str(i):f.split("\n")[2].strip()[3:-3]})
         em=discord.Embed(title="Quantum Bot Help Message",color=eval(hex(ctx.author.color.value)))
         for i in command_list.keys():
-                em.add_field(name=i+" help",value="\n".join(["**_"+m+"_**"+": "+message[m] for m in command_list[i]]),inline=False)
-        await ctx.send(embed=em)
+                embeds.append(discord.Embed(title=i+" help",description="\n".join(["***"+m+"***"+": "+message[m] for m in command_list[i]]),inline=False,colour=ctx.author.colour))
+        #till now we got the embeds, now for paginator
+        info_embed=discord.Embed(title="Quantum Bot help message",description="""Please press:
+        \u23EA to view the very first help message.
+        \u25C0 to scroll backward
+        \u23F9 to stop looking through the commands
+        \u25B6 to scroll forward
+        \u23E9 to view the very last help message
+        \u0001F522 to search by page 
+        \u2139 to view this help message""",colour=ctx.author.colour)
+        curr=0
+        reactions=['\u23EA','\u25C0','\u23F9','\u25B6','\u23E9','\U0001f522','\u2139']
+        mess=await ctx.send(embed=info_embed)
+        for i in reactions:
+            await mess.add_reaction(i)
+        while True:
+            try:
+                waiting=await bot.wait_for('reaction_add',check=lambda reaction,user:(user.id==ctx.author.id) and (reaction.emoji in reactions),timeout=60)
+                if waiting[0].emoji=="\u23EA":
+                        curr=0
+                        await mess.edit(embed=embeds[0])
+                elif waiting[0].emoji=="\u25C0":
+                        if curr==0:curr=7
+                        else:curr-=1
+                        await mess.edit(embed=embeds[curr])
+                elif waiting[0].emoji=="\u23F9":
+                        break
+                elif waiting[0].emoji=="\u25B6":
+                        if curr==7:curr=0
+                        else:curr+=1
+                        await mess.edit(embed=embeds[curr])
+                elif waiting[0].emoji=="\u23E9":
+                        curr=7
+                        await mess.edit(embed=embeds[7])
+                elif waiting[0].emoji=="\u0001F522":
+                        await ctx.send("Select your page number (from 1 to 8)")
+                        num=await bot.wait_for('message',check=lambda message:(message.content in ["1","2","3","4","5","6","7","8"]) and (message.author.id==ctx.author.id),timeout=60)
+                        curr=int(num.content)-1
+                        await mess.edit(embed=embeds[curr])
+                elif waiting[0].emoji=="\u2139":
+                        await mess.edit(embed=info_embed)
+            except asyncio.TimeoutError:
+                break
+        await mess.edit(embed=discord.Embed(title="You have just used Quantum Bot's help message",description="Thank you!",colour=ctx.author.colour))
         
     @commands.command(aliases=["chelp","ch"])
     async def coghelp(self,ctx,cog:str=None):
@@ -339,16 +382,7 @@ class Owner:
                 else:
                     await ctx.guild.get_member(member.id).send(embed=discord.Embed(title="Warning!",description="**My bot owner warned your because**:{}".format(reason),colour=discord.Colour(0xFFFF00)))
                 await ctx.message.add_reaction('\u2705')
-                         
-                     
-    @commands.command()
-    async def blacklist(self,ctx,member:discord.Member=None):
-            '''[WIP] to prevent bad people from misusing my bot'''
-            global blacklisted
-            if member==None:
-                    return ("\n".join([f.name for f in blacklisted]) if len(blacklisted)>0 else "Nobody blacklisted yet")
-            else:
-                    blacklisted.append(member)
+
     @commands.command()
     async def pydir(self,ctx,command=None):
             '''list of methods of a given object'''
