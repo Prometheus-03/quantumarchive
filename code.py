@@ -105,7 +105,8 @@ class General:
         embed.add_field(name="Date",value="{}".format(m[0]))
         embed.add_field(name="Time",value="{}GMT".format(m[1]))
         await ctx.send(embed=embed)
- 
+        
+class Feedback: 
     @commands.command(aliases=['fb'])
     async def feedback(self,ctx,*,message):
         '''My bot is not very good, feedback is appreciated!'''
@@ -117,6 +118,22 @@ class General:
     async def poll(self,ctx,*,question):
         '''whenever you need opinions, use this!'''
         await ctx.send('This command will work in the future :)')
+
+    @commands.command()
+    async def suggest(self,ctx,command,*,description):
+        '''suggest commands I should work on, and follow by a short description on how it works'''
+        author=ctx.message.author.name
+        m=await bot.get_guild(413290013254615041).get_channel(413631317272690688).send(embed=discord.Embed(title=author+" suggested a command '"+command+"'",description=description,color=ctx.author.color))
+        await m.add_reaction("\u2705")
+        await m.add_reaction("\u274C")
+        r=await bot.wait_for('reaction_add',check=lambda reaction,author:(author.id==owner_id) and (reaction.emoji in ["\u2705","\u274C"]))
+        if r[0].emoji=="\u2705":
+            await ctx.author.send("Your command {} has been accepted by the owner.".format(command))
+            await m.edit(embed=discord.Embed(title="Command to work on: "+command,description=description))
+        elif r[0].emoji=="\u274C":
+            await ctx.author.send("Your command {} has been rejected by the owner.".format(command))
+            await m.delete()
+        
 class Information:
     '''To know more about the bot'''
     @commands.command()
@@ -219,7 +236,7 @@ Server Region:{}\nMember count:{}\nOwner:{}\nCreated On:{}\nVerification Level={
                 message.update({str(i):f.split("\n")[2].strip()[3:-3]})
         em=discord.Embed(title="Quantum Bot Help Message",color=eval(hex(ctx.author.color.value)))
         for i in command_list.keys():
-                embeds.append(discord.Embed(title=i+" help",description="\n".join(["***"+m+"***"+": "+message[m] for m in command_list[i]]),inline=False,colour=ctx.author.colour))
+                embeds.append(discord.Embed(title=i+" help",description="\n".join([m+": "+message[m] for m in command_list[i]]),inline=False,colour=ctx.author.colour))
         #till now we got the embeds, now for paginator
         info_embed=discord.Embed(title="Quantum Bot help message",description="""Please press:
         \u23EA to view the very first help message.
@@ -227,11 +244,12 @@ Server Region:{}\nMember count:{}\nOwner:{}\nCreated On:{}\nVerification Level={
         \u23F9 to stop looking through the commands
         \u25B6 to scroll forward
         \u23E9 to view the very last help message
-        \u0001F522 to search by page 
+        \U0001f522 to search by page 
         \u2139 to view this help message""",colour=ctx.author.colour)
         curr=0
         reactions=['\u23EA','\u25C0','\u23F9','\u25B6','\u23E9','\U0001f522','\u2139']
         mess=await ctx.send(embed=info_embed)
+        cogc=len(list(bot.cogs.keys()))-1
         for i in reactions:
             await mess.add_reaction(i)
         while True:
@@ -241,21 +259,21 @@ Server Region:{}\nMember count:{}\nOwner:{}\nCreated On:{}\nVerification Level={
                         curr=0
                         await mess.edit(embed=embeds[0])
                 elif waiting[0].emoji=="\u25C0":
-                        if curr==0:curr=7
+                        if curr==0:curr=cogc
                         else:curr-=1
                         await mess.edit(embed=embeds[curr])
                 elif waiting[0].emoji=="\u23F9":
                         break
                 elif waiting[0].emoji=="\u25B6":
-                        if curr==7:curr=0
+                        if curr==cogc:curr=0
                         else:curr+=1
                         await mess.edit(embed=embeds[curr])
                 elif waiting[0].emoji=="\u23E9":
-                        curr=7
-                        await mess.edit(embed=embeds[7])
-                elif waiting[0].emoji=="\u0001F522":
-                        await ctx.send("Select your page number (from 1 to 8)")
-                        num=await bot.wait_for('message',check=lambda message:(message.content in ["1","2","3","4","5","6","7","8"]) and (message.author.id==ctx.author.id),timeout=60)
+                        curr=cogc
+                        await mess.edit(embed=embeds[cogc])
+                elif waiting[0].emoji=="\U0001f522":
+                        await ctx.send("Select your page number (from 1 to %d)"%(cogc+1))
+                        num=await bot.wait_for('message',check=lambda message:(message.content in [str(i+1) for i in range(cogc+1)]) and (message.author.id==ctx.author.id),timeout=60)
                         curr=int(num.content)-1
                         await mess.edit(embed=embeds[curr])
                 elif waiting[0].emoji=="\u2139":
@@ -476,11 +494,12 @@ async def on_ready():
     bot.add_cog(Admin())
     bot.add_cog(Math())
     bot.add_cog(General())
+    bot.add_cog(Feedback())
     bot.add_cog(Fun())
     bot.add_cog(Media())
     await bot.change_presence(activity=discord.Game(name='Type [q?help] for help', type=2),status=discord.Status.dnd)
     f=bot.get_guild(413290013254615041).get_channel(436548366088798219)
-    await f.send(embed=discord.Embed(title="Bot reawakened at: ",description=f"{datetime.datetime.now(): %B %d, %Y at %H:%M:%S GMT}"))
+    await f.send(embed=discord.Embed(title="Bot reawakened at: ",description=f"{datetime.datetime.utcnow(): %B %d, %Y at %H:%M:%S GMT}"))
     async def change_activities():
         timeout = 5 #Here you can change the delay between changes 
         while True:
