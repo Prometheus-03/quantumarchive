@@ -182,8 +182,10 @@ class Information:
             sid=ctx.guild.id
             ver=["None","Low","Medium","High","Ultra High"][ctx.guild.verification_level]
             region=ctx.guild.region
-            await ctx.send(embed=discord.Embed(color=discord.Color(0x000000),title="Server Info:",description="""Server Name:{}\nServer Id:{}\n
-Server Region:{}\nMember count:{}\nOwner:{}\nCreated On:{}\nVerification Level={}""".format(server,sid,region,members,owner,created,ver)))
+            embed=discord.Embed(color=discord.Color(0x000000),title="Server Info:",description="""Server Name:{}\nServer Id:{}\n
+Server Region:{}\nMember count:{}\nOwner:{}\nCreated On:{}\nNumber of text channels:{}\nNumber of voice channels:{}\nVerification Level={}""".format(server,sid,region,members,owner,created,len(ctx.guild.text_channels),len(ctx.guild.voice_channels),ver))
+            embed.set_thumbnail(url=ctx.guild.icon_url)
+            await ctx.send(embed=embed)
              
     @commands.command(pass_context=True)
     async def perms(self,ctx,user:discord.Member=None):
@@ -281,26 +283,7 @@ Server Region:{}\nMember count:{}\nOwner:{}\nCreated On:{}\nVerification Level={
             except asyncio.TimeoutError:
                 break
         await mess.edit(embed=discord.Embed(title="You have just used Quantum Bot's help message",description="Thank you!",colour=ctx.author.colour))
-        
-    @commands.command(aliases=["chelp","ch"])
-    async def coghelp(self,ctx,cog:str=None):
-        '''to get specific help messages from specific cogs'''
-        command_list={}
-        message={}
-        for i in bot.cogs.keys():
-                if i!='REPL':command_list.update({i:(m for m in dir(bot.get_cog(i))[26:])})
-                else:command_list.update({'REPL':('exec','repl')})
-        for i in bot.commands:
-                f=inspect.getsource(bot.get_command(str(i)).callback)
-                message.update({str(i):f.split("\n")[2].strip()[3:-3]})
-        if cog.lower() in list(map(lambda x:x.lower(),list(bot.cogs.keys()))):
-                em=discord.Embed(title=cog+" Help Message",color=eval(hex(ctx.author.color.value)),description="\n".join([("**_"+m+"_**"+": "+message[m] if m!="_eval" else "**_exec_**"+": "+message[m]) for m in dir(bot.get_cog(cog))[26:]]),inline=False)
-        elif cog==None:
-                em=discord.Embed(title="List of cogs",color=eval(hex(ctx.author.color.value)),description="\n".join([i for i in bot.cogs.keys()]))
-        else:
-                em=discord.Embed(title="Invalid Arguments passed",color=eval(hex(ctx.author.color.value)),description="No such cog called '"+cog+"' found.")
-        await ctx.send(embed=em)
-             
+                 
 class Fun:
     '''have fun with these commands'''
     @commands.command()
@@ -387,9 +370,12 @@ class Owner:
         '''getting the code for command'''
         if ctx.author.id==owner_id:
             a=inspect.getsource(bot.get_command(command).callback)
+            m=len(a)//1900
+            for x in range(m):
+                await ctx.send(embed=discord.Embed(title="Page {}/{} of '{}' command".format(x+1,m+1,command),description="```py\n"+a[1900*x:1900*(x+1)]+"```",colour=discord.Colour.dark_gold()))
+            await ctx.send(embed=discord.Embed(title="Page {}/{} of '{}' command".format(m+1,m+1,command),description="```py\n"+a[1900*m:]+"```",colour=discord.Colour.dark_gold()))
         else:
-            a="You are not the owner! Not allowed!"
-        await ctx.send("```"+a+"```")
+            await ctx.send(embed=discord.Embed(title="Access denied!",description="This command can only be used by the bot owner!",colour=discord.Colour.red()))
          
     @commands.command(pass_context=True)
     async def warn(self,ctx,member:discord.Member,serious:bool,*,reason):
@@ -483,6 +469,27 @@ class Media:
                     m.add_field(name="Links",value=f['img']+'\nhttps://xkcd.com/'+str(f['num']))
                     m.add_field(name="Publication date:",value=f['day']+'/'+f['month']+'/'+f['year'],inline=False)
             await ctx.send(embed=m)
+
+    @commands.cooldown(rate=1,per=8,type=commands.BucketType.guild)
+    @commands.command()
+    async def weather(self,ctx,*,location):
+        '''to get the weather'''
+        try:
+            async with ctx.typing():
+                url="http://api.tanvis.xyz/weather/"+urllib.request.pathname2url(location)
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(url) as response:
+                        f = await response.json(encoding='utf8')
+                if 'error' in f:
+                    await ctx.send(embed=discord.Embed(title="An error occurred",description="I could not find your given location",colour=discord.Colour.red()))
+                else:
+                    embed=discord.Embed(title="Weather information gathered",colour=discord.Colour.dark_orange(),description="Here is your result, "+ctx.author.mention)
+                    embed.add_field(name="Location",value=f['name'],inline=False);embed.add_field(name="Temperature in °C",value=f['celsius'])
+                    embed.add_field(name="Temperature in °F",value=f['fahrenheit']);embed.add_field(name="Weather",value=f['weather'])
+                    embed.add_field(name="Wind Speed",value=f['windSpeed']);embed.set_thumbnail(url=f['icon'])
+                    await ctx.send(embed=embed)
+        except:
+                await ctx.send("An error occurred. Please try again.",delete_after=3)
 # everything from here onwards are bot events
 
 @bot.event
@@ -516,12 +523,6 @@ async def on_member_join(member):
         embed.add_field(name="Bot",value=member.bot)
         embed.add_field(name="Member id",value=member.id)
         await member.guild.get_channel(413303508289454081).send(embed=embed)
-    elif member.guild.id==265828729970753537:
-        embed=discord.Embed(title="Member join",description="Welcome to sebi's bot tutorial server, "+member.name+"! Please read the rules in "+member.guild.get_channel(384663295287623680).mention+" before you proceed :)",colour=discord.Colour.from_rgb(87,242,87))
-        embed.set_thumbnail(url=member.avatar_url)
-        embed.add_field(name="Bot",value=member.bot)
-        embed.add_field(name="Member id",value=member.id)
-        await member.guild.get_channel(426860084161937410).send(embed=embed)
         
 @bot.event
 async def on_member_remove(member):
@@ -531,12 +532,6 @@ async def on_member_remove(member):
         embed.add_field(name="Bot",value=member.bot)
         embed.add_field(name="Member id",value=member.id)
         await member.guild.get_channel(413303508289454081).send(embed=embed)
-    elif member.guild.id==265828729970753537:
-        embed=discord.Embed(title="Member leave",description="We're sad to see you leave, "+member.name+"! We wish you could return :(",colour=discord.Colour.from_rgb(242,23,33))
-        embed.set_thumbnail(url=member.avatar_url)
-        embed.add_field(name="Bot",value=member.bot)
-        embed.add_field(name="Member id",value=member.id)
-        await member.guild.get_channel(426860084161937410).send(embed=embed)
 
 @bot.event
 async def on_command_error(ctx,error):
