@@ -4,13 +4,39 @@ import urllib.request
 import urllib.parse
 from googlesearch import search
 blacklisted=[]
+#my own utilities
 def tdm(td):
         return ((td.days * 86400000) + (td.seconds * 1000)) + (td.microseconds / 1000)
 
+def find(substring, string):
+    """ 
+    Generate indices of where substring begins in string
+
+    >>> list(find_substring('me', "The cat says meow, meow"))
+    [13, 19]
+    """
+    last_found = -1  # Begin at -1 so the next position to search from is 0
+    while True:
+        # Find next index of substring, by starting after its last known position
+        last_found = string.find(substring, last_found + 1)
+        if last_found == -1:  
+            break  # All occurrences have been found
+        yield last_found
+
+async def getjson(url):
+        """
+        This command helps get the json automatically without extra code
+        """
+        async with aiohttp.ClientSession() as session:
+                async with session.get(url) as response:
+                        f = await response.json(encoding='utf8')
+        return f
+#configs
 owner_id=360022804357185537
 bot_id=384623978028859392
 prefixes=('q!', 'q>', 'q<', 'q+', 'q-', 'q*', 'q/', 'q?', 'q.', 'q,', 'q:', 'q;','Q!', 'Q>', 'Q<', 'Q+', 'Q-', 'Q*', 'Q/', 'Q?', 'Q.', 'Q,', 'Q:', 'Q;', 'quantum ', 'quantuM ', 'quantUm ', 'quantUM ', 'quanTum ', 'quanTuM ', 'quanTUm ', 'quanTUM ', 'quaNtum ', 'quaNtuM ', 'quaNtUm ', 'quaNtUM ', 'quaNTum ', 'quaNTuM ', 'quaNTUm ', 'quaNTUM ', 'quAntum ', 'quAntuM ', 'quAntUm ', 'quAntUM ', 'quAnTum ', 'quAnTuM ', 'quAnTUm ', 'quAnTUM ', 'quANtum ', 'quANtuM ', 'quANtUm ', 'quANtUM ', 'quANTum ', 'quANTuM ', 'quANTUm ', 'quANTUM ', 'qUantum ', 'qUantuM ', 'qUantUm ', 'qUantUM ', 'qUanTum ', 'qUanTuM ', 'qUanTUm ', 'qUanTUM ', 'qUaNtum ', 'qUaNtuM ', 'qUaNtUm ', 'qUaNtUM ', 'qUaNTum ', 'qUaNTuM ', 'qUaNTUm ', 'qUaNTUM ', 'qUAntum ', 'qUAntuM ', 'qUAntUm ', 'qUAntUM ', 'qUAnTum ', 'qUAnTuM ', 'qUAnTUm ', 'qUAnTUM ', 'qUANtum ', 'qUANtuM ', 'qUANtUm ', 'qUANtUM ', 'qUANTum ', 'qUANTuM ', 'qUANTUm ', 'qUANTUM ', 'Quantum ', 'QuantuM ', 'QuantUm ', 'QuantUM ', 'QuanTum ', 'QuanTuM ', 'QuanTUm ', 'QuanTUM ', 'QuaNtum ', 'QuaNtuM ', 'QuaNtUm ', 'QuaNtUM ', 'QuaNTum ', 'QuaNTuM ', 'QuaNTUm ', 'QuaNTUM ', 'QuAntum ', 'QuAntuM ', 'QuAntUm ', 'QuAntUM ', 'QuAnTum ', 'QuAnTuM ', 'QuAnTUm ', 'QuAnTUM ', 'QuANtum ', 'QuANtuM ', 'QuANtUm ', 'QuANtUM ', 'QuANTum ', 'QuANTuM ', 'QuANTUm ', 'QuANTUM ', 'QUantum ', 'QUantuM ', 'QUantUm ', 'QUantUM ', 'QUanTum ', 'QUanTuM ', 'QUanTUm ', 'QUanTUM ', 'QUaNtum ', 'QUaNtuM ', 'QUaNtUm ', 'QUaNtUM ', 'QUaNTum ', 'QUaNTuM ', 'QUaNTUm ', 'QUaNTUM ', 'QUAntum ', 'QUAntuM ', 'QUAntUm ', 'QUAntUM ', 'QUAnTum ', 'QUAnTuM ', 'QUAnTUm ', 'QUAnTUM ', 'QUANtum ', 'QUANtuM ', 'QUANtUm ', 'QUANtUM ', 'QUANTum ', 'QUANTuM ', 'QUANTUm ', 'QUANTUM ')
 bot = commands.Bot(description='Tune in to lots of fun with this bot!', command_prefix=commands.when_mentioned_or(*prefixes))
+#commands
 class Math:
     '''for mathematical fun'''
     @commands.command()
@@ -235,10 +261,14 @@ Server Region:{}\nMember count:{}\nOwner:{}\nCreated On:{}\nNumber of text chann
                 else:command_list.update({'REPL':('exec','repl')})
         for i in bot.commands:
                 f=inspect.getsource(bot.get_command(str(i)).callback)
-                message.update({str(i):f.split("\n")[2].strip()[3:-3]})
+                m=list(find("'''",f))
+                message.update({str(i):f[m[0]+3:m[1]]})
         em=discord.Embed(title="Quantum Bot Help Message",color=eval(hex(ctx.author.color.value)))
         for i in command_list.keys():
-                embeds.append(discord.Embed(title=i+" help",description="\n".join([m+": "+message[m] for m in command_list[i]]),inline=False,colour=ctx.author.colour))
+                embed=discord.Embed(title=i+" help",inline=False,colour=ctx.author.colour)
+                for m in command_list[i]:
+                      embed.add_field(name=m,value=message[m],inline=False)
+                embeds.append(embed)
         #till now we got the embeds, now for paginator
         info_embed=discord.Embed(title="Quantum Bot help message",description="""Please press:
         \u23EA to view the very first help message.
@@ -430,12 +460,15 @@ class Media:
                 
     @commands.command()
     async def google(self, ctx, *, anything):
-            """: Search Google for something, experimental"""
+            '''Search Google for something, experimental'''
             content=[]
             async with ctx.typing():
-                for url in search(anything, tld='com', lang='en',start=1,stop=10):
-                    content.append(url)
-            await ctx.send(embed=discord.Embed(title="'%s' search results:'"%anything,description="\n".join(content),colour=discord.Colour.from_rgb(66, 133, 244)))
+                m=await getjson("http://api.tanvis.xyz/search/"+urllib.request.pathname2url(anything))
+            for i in m:
+                content.append(i['link'])
+            embed=discord.Embed(title="'%s' search results:"%anything,description="\n".join(content),colour=discord.Colour.from_rgb(66, 133, 244))
+            embed.set_footer(text="using tanvis.xyz API")
+            await ctx.send(embed=embed)
 
     @commands.command()
     async def xkcd(self, ctx, num:int=None):
@@ -444,9 +477,7 @@ class Media:
             async with ctx.typing():
                 if num is None:num=random.randint(1,1996)
                 url = f'https://xkcd.com/{num}/info.0.json'
-                async with aiohttp.ClientSession() as session:
-                    async with session.get(url) as response:
-                        f = await response.json(encoding='utf8')
+                f = await getjson(url)
                 m=discord.Embed(colour=discord.Color.from_rgb(245,245,220),title="xkcd #{}:{}".format(str(f['num']),f['safe_title']),description=f['transcript'],timestamp=datetime.datetime.now())
                 m.set_image(url=f['img'])
                 m.add_field(name="Links",value=f['img']+'\nhttps://xkcd.com/'+str(f['num']))
@@ -477,9 +508,7 @@ class Media:
         try:
             async with ctx.typing():
                 url="http://api.tanvis.xyz/weather/"+urllib.request.pathname2url(location)
-                async with aiohttp.ClientSession() as session:
-                    async with session.get(url) as response:
-                        f = await response.json(encoding='utf8')
+                f=await getjson(url)
                 if 'error' in f:
                     await ctx.send(embed=discord.Embed(title="An error occurred",description="I could not find your given location",colour=discord.Colour.red()))
                 else:
@@ -487,6 +516,7 @@ class Media:
                     embed.add_field(name="Location",value=f['name'],inline=False);embed.add_field(name="Temperature in °C",value=f['celsius'])
                     embed.add_field(name="Temperature in °F",value=f['fahrenheit']);embed.add_field(name="Weather",value=f['weather'])
                     embed.add_field(name="Wind Speed",value=f['windSpeed']);embed.set_thumbnail(url=f['icon'])
+                    embed.set_footer(text="using **tanvis.xyz** API")
                     await ctx.send(embed=embed)
         except:
                 await ctx.send("An error occurred. Please try again.",delete_after=3)
@@ -542,5 +572,9 @@ async def on_command_error(ctx,error):
 async def on_message(message):
         #add stuff here when you want to
         await bot.process_commands(message)
+
+@bot.event
+async def on_message_edit(before,after):
+        await bot.process_commands(after)
 bot.run('Mzg0NjIzOTc4MDI4ODU5Mzky.DZecOA.rekvrUSZL8q9QVzlIlnoS0lNYVI')
 #ok
