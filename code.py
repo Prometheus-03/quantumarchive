@@ -470,9 +470,17 @@ class Media:
             embed.set_footer(text="using tanvis.xyz API")
             await ctx.send(embed=embed)
 
+    @commands.command(aliases=['wiki'])
+    async def wikipedia(self, ctx, *, anything):
+            '''look through wikipedia for what you want'''
+            wew=urllib.request.urlencode(anything)
+            f=getjson(f"https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&indexpageids=1&redirects=1&explaintext=1&exsectionformat=plain&titles={wew}")
+            await ctx.send(embed=discord.Embed(title=f['title'],description=f['extract'][:max(list(filter(lambda x:x<1980,find(". ",f['extract']))))],colour=ctx.author.colour))
+
     @commands.command()
     async def xkcd(self, ctx, num:int=None):
         '''read the famous comic strip'''
+
         try:
             async with ctx.typing():
                 if num is None:num=random.randint(1,1996)
