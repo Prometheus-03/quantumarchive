@@ -251,8 +251,17 @@ Server Region:{}\nMember count:{}\nOwner:{}\nCreated On:{}\nNumber of text chann
         return permlist[perm]
  
     @commands.command(aliases=["h"])
-    async def help(self,ctx):
-        '''bot help message'''
+    async def help(self,ctx,command=None):
+      '''bot help message
+    Usage:
+      '''
+      if command in [i.name for i in bot.commands]:
+        f=inspect.getsource(bot.get_command(command).callback)
+        m=list(find("'''",f))
+        embed=discord.Embed(title="Help for '"+command+"' command",description=f[m[0]+3:m[1]],colour=ctx.author.color)
+        embed.set_thumbnail(url=bot.user.avatar_url)
+        await ctx.send(embed=embed)
+      else:
         command_list={}
         message={}
         embeds=[]
@@ -460,7 +469,9 @@ class Media:
                 
     @commands.command()
     async def google(self, ctx, *, anything):
-            '''Search Google for something, experimental'''
+            '''Search Google for something
+    Usage:
+    q!google [query]'''
             content=[]
             async with ctx.typing():
                 m=await getjson("http://api.tanvis.xyz/search/"+urllib.request.pathname2url(anything))
@@ -473,9 +484,9 @@ class Media:
     @commands.command(aliases=['wiki'])
     async def wikipedia(self, ctx, *, anything):
             '''look through wikipedia for what you want,
-            Usage:
-            q!wikipedia [query]
-            q!wiki [query]'''
+    Usage:
+    q!wikipedia [query]
+    q!wiki [query]'''
             wew=urllib.request.pathname2url(anything)
             f=await getjson(f"https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&indexpageids=1&redirects=1&explaintext=1&exsectionformat=plain&titles={wew}")
             query=f['query']
@@ -486,7 +497,10 @@ class Media:
 
     @commands.command()
     async def xkcd(self, ctx, num:int=None):
-        '''read the famous comic strip'''
+        '''read the famous comic strip
+    Usage:
+    q!xkcd ->returns random xkcd comic
+    q!xkcd <number> ->returns the xkcd comic strip with that number'''
         try:
             async with ctx.typing():
                 if num is None:num=random.randint(1,1996)
@@ -518,7 +532,9 @@ class Media:
     @commands.cooldown(rate=1,per=8,type=commands.BucketType.guild)
     @commands.command()
     async def weather(self,ctx,*,location):
-        '''to get the weather'''
+        '''to get the weather of a given location
+    Usage:
+    q!weather [location]'''
         try:
             async with ctx.typing():
                 url="http://api.tanvis.xyz/weather/"+urllib.request.pathname2url(location)
