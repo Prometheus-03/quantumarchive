@@ -1,4 +1,4 @@
-import asyncio,discord,math,random,time,datetime,aiohttp,functools,inspect,re
+import asyncio,discord,math,random,time,datetime,aiohttp,functools,inspect,re,io,contextlib
 from discord.ext import commands
 import urllib.request
 import urllib.parse
@@ -293,6 +293,7 @@ Server Region:{}\nMember count:{}\nOwner:{}\nCreated On:{}\nNumber of text chann
         cogc=len(list(bot.cogs.keys()))-1
         for i in reactions:
             await mess.add_reaction(i)
+            await asyncio.sleep(1)
         while True:
             try:
                 waiting=await bot.wait_for('reaction_add',check=lambda reaction,user:(user.id==ctx.author.id) and (reaction.emoji in reactions),timeout=60)
@@ -319,9 +320,11 @@ Server Region:{}\nMember count:{}\nOwner:{}\nCreated On:{}\nNumber of text chann
                         await mess.edit(embed=embeds[curr])
                 elif waiting[0].emoji=="\u2139":
                         await mess.edit(embed=info_embed)
+                await mess.remove_reaction(waiting[0].emoji,ctx.author)
             except asyncio.TimeoutError:
                 break
         await mess.edit(embed=discord.Embed(title="You have just used Quantum Bot's help message",description="Thank you!",colour=ctx.author.colour))
+        await mess.clear_reactions()
                  
 class Fun:
     '''have fun with these commands'''
@@ -425,10 +428,12 @@ class Owner:
                 else:
                     await ctx.guild.get_member(member.id).send(embed=discord.Embed(title="Warning!",description="**My bot owner warned your because**:{}".format(reason),colour=discord.Colour(0xFFFF00)))
                 await ctx.message.add_reaction('\u2705')
-
+class Pystuff():
     @commands.command()
-    async def pydir(self,ctx,command=None):
-            '''list of methods of a given object'''
+    async def pydir(self,ctx,*,command=None):
+            '''list of methods of a given object
+    Usage:
+    q!pydir [object]'''
             if ctx.message.author.id!=owner_id:
                 await ctx.send(embed=discord.Embed(title="Error message",color=eval(hex(ctx.author.color.value)),description="Not allowed!"))
             else:                
@@ -447,7 +452,31 @@ class Owner:
                         content="Object %s is not found!"%command
                 await ctx.send(embed=discord.Embed(title="Useful methods for object '%s'"%command,color=eval(hex(ctx.author.color.value)),description=content))
      
- 
+    @commands.command()
+    async def pyhelp(self,ctx,*,command=None):
+            '''the Python help message for a given object
+    Usage:
+    q!pyhelp [object]'''
+            if ctx.message.author.id!=owner_id:
+                await ctx.send(embed=discord.Embed(title="Error message",color=eval(hex(ctx.author.color.value)),description="Not allowed!"))
+            else:
+                if command is None:await ctx.send("Argument [command name] must be provided!")
+                else:
+                    #try:
+                        embeds=[]
+                        sio = io.StringIO()
+                        with contextlib.redirect_stdout(sio):
+                            help(command)
+                        sio.seek(0)
+                        a = sio.getvalue()
+                        sio = None
+                        for i in range(1,len(a)//1950+1):
+                            embeds.append(discord.Embed(title="Python help Page [%d/%d]"%(i,len(a)//1950),description="```{}```".format(a[1950*i:1950*(i+1)]),color=ctx.author.color))
+                        for i in embeds:
+                            await ctx.send(embed=i)
+                    #except NameError:
+                        #await ctx.send(embed=discord.Embed(title="Error raised!",description="Object %s is not found!"%command))
+                        
 class Media:
     @commands.command(passcontext=True)
     async def youtube(self, ctx, *, youtube):
@@ -553,29 +582,6 @@ class Media:
 # everything from here onwards are bot events
 
 @bot.event
-async def on_ready():
-    bot.remove_command('help')
-    bot.load_extension('code2')
-    bot.add_cog(Owner())
-    bot.add_cog(Information())
-    bot.add_cog(Admin())
-    bot.add_cog(Math())
-    bot.add_cog(General())
-    bot.add_cog(Feedback())
-    bot.add_cog(Fun())
-    bot.add_cog(Media())
-    await bot.change_presence(activity=discord.Game(name='Type [q?help] for help', type=2),status=discord.Status.dnd)
-    f=bot.get_guild(413290013254615041).get_channel(436548366088798219)
-    await f.send(embed=discord.Embed(title="Bot reawakened at: ",description=f"{datetime.datetime.utcnow(): %B %d, %Y at %H:%M:%S GMT}"))
-    async def change_activities():
-        timeout = 5 #Here you can change the delay between changes 
-        while True:
-            possb='Type [{}help] for help'.format(random.choice(prefixes))
-            await bot.change_presence(activity=discord.Game(possb,status=discord.Status.dnd))
-            await asyncio.sleep(timeout)
-    bot.loop.create_task(change_activities())
-
-@bot.event
 async def on_member_join(member):
     if member.guild.id==413290013254615041:
         embed=discord.Embed(title="Member join",description="Welcome to Quantum Bot and Pegasus server, "+member.name+"! Please read the rules in "+member.guild.get_channel(444443837482532867).mention+" before you proceed :)",colour=discord.Colour.from_rgb(87,242,87))
@@ -606,5 +612,29 @@ async def on_message(message):
 @bot.event
 async def on_message_edit(before,after):
         await bot.process_commands(after)
+
+@bot.event
+async def on_ready():
+    bot.remove_command('help')
+    bot.load_extension('code2')
+    bot.add_cog(Owner())
+    bot.add_cog(Pystuff())
+    bot.add_cog(Information())
+    bot.add_cog(Admin())
+    bot.add_cog(Math())
+    bot.add_cog(General())
+    bot.add_cog(Feedback())
+    bot.add_cog(Fun())
+    bot.add_cog(Media())
+    await bot.change_presence(activity=discord.Game(name='Type [q?help] for help', type=2),status=discord.Status.dnd)
+    f=bot.get_guild(413290013254615041).get_channel(436548366088798219)
+    await f.send(embed=discord.Embed(title="Bot reawakened at: ",description=f"{datetime.datetime.utcnow(): %B %d, %Y at %H:%M:%S GMT}"))
+    async def change_activities():
+        timeout = 5 #Here you can change the delay between changes 
+        while True:
+            possb='Type [{}help] for help'.format(random.choice(prefixes))
+            await bot.change_presence(activity=discord.Game(possb,status=discord.Status.dnd))
+            await asyncio.sleep(timeout)
+    bot.loop.create_task(change_activities())
 bot.run('Mzg0NjIzOTc4MDI4ODU5Mzky.DZecOA.rekvrUSZL8q9QVzlIlnoS0lNYVI')
 #ok
