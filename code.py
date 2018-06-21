@@ -169,7 +169,7 @@ class Information:
         membs = len(bot.users)
         creator = "Pegasus#4022"
         date = f"{bot.user.created_at: %B %d, %Y at %H:%M:%S GMT}"
-        await ctx.send("Servers streaming: {}\nUsers streaming: {}\nCreator: {}\nCreation date: {}".format(serv,membs,creator,date))
+        await ctx.send(embed=discord.Embed(title="Some bot statistics",description="```Servers streaming: {}\nUsers streaming: {}\nCreator: {}\nCreation date: {}\nBot Owner: {}```".format(serv,membs,creator,date,"Dark Angel#4022"),color=ctx.author.colour))
  
     @commands.command()
     async def prefix(self, ctx):
@@ -462,7 +462,7 @@ class Pystuff():
             else:
                 if command is None:await ctx.send("Argument [command name] must be provided!")
                 else:
-                    #try:
+                    try:
                         embeds=[]
                         sio = io.StringIO()
                         with contextlib.redirect_stdout(sio):
@@ -471,11 +471,12 @@ class Pystuff():
                         a = sio.getvalue()
                         sio = None
                         for i in range(1,len(a)//1950+1):
-                            embeds.append(discord.Embed(title="Python help Page [%d/%d]"%(i,len(a)//1950),description="```{}```".format(a[1950*i:1950*(i+1)]),color=ctx.author.color))
+                            embeds.append(discord.Embed(title="Python help Page [%d/%d]"%(i,len(a)//1950+1),description="```{}```".format(a[1950*(i-1):1950*i]),color=ctx.author.color))
+                        embeds.append(discord.Embed(title="Python help Page [%d/%d]"%(len(a)//1950+1,len(a)//1950+1),description="```{}```".format(a[1950*(len(a)//1950):]),color=ctx.author.color))
                         for i in embeds:
                             await ctx.send(embed=i)
-                    #except NameError:
-                        #await ctx.send(embed=discord.Embed(title="Error raised!",description="Object %s is not found!"%command))
+                    except NameError:
+                        await ctx.send(embed=discord.Embed(title="Error raised!",description="Object %s is not found!"%command))
                         
 class Media:
     @commands.command(passcontext=True)
