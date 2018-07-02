@@ -41,7 +41,9 @@ class Math:
     '''for mathematical fun'''
     @commands.command()
     async def add(self, ctx,*,nums):
-        '''returns sum of numbers separated with spaces'''
+        '''returns sum of numbers separated with spaces
+    Usage:
+    q!add [numbers separated by spaces]'''
         try:
             await ctx.send(str(sum([int(i) for i in nums.split()])))
         except:
@@ -49,7 +51,9 @@ class Math:
  
     @commands.command()
     async def mul(self, ctx,*,nums):
-        '''returns product of arguments separated with spaces'''
+        '''returns product of arguments separated with spaces
+    Usage:
+    q!mul [numbers separated by spaces]'''
         try:
             m=lambda x,y:x*y
             await ctx.send(str(functools.reduce(m,[int(i) for i in nums.split()])))
@@ -58,7 +62,9 @@ class Math:
  
     @commands.command()
     async def factorial(self,ctx,num:int):
-            '''returns the factorial of the given input'''
+            '''returns the factorial of the given input
+    Usage:
+    q!factorial [number]'''
             try:
                     await ctx.send(embed=discord.Embed(title="%d! is equal to..."%num,description=str(math.factorial(num))))
             except Exception as p:
@@ -66,7 +72,9 @@ class Math:
 
     @commands.command()
     async def collatz(self,ctx,num:int):
-        '''dedicated to the famous conjecture, will return the steps from input to 1'''
+        '''dedicated to the famous conjecture, will return the steps from input to 1
+    Usage:
+    q!collatz [seed]'''
         nums=[num]
         last=num
         while last>1:
@@ -81,7 +89,9 @@ class Admin:
     '''for administrative purposes'''
     @commands.command()
     async def kick(self, ctx, member: discord.Member):
-        '''Kick members from your server'''
+        '''Kick members from your server
+    Usage:
+    q!kick [member]'''
         try:
                 await member.kick()
                 await ctx.message.add_reaction('\u2705')
@@ -89,7 +99,9 @@ class Admin:
                 await ctx.message.add_reaction('\u274C')
     @commands.command()
     async def ban(self, ctx, member: discord.Member):
-        '''Ban toxic members from your server'''
+        '''Ban toxic members from your server
+    Usage:
+    q!ban [member]'''
         try:
                 await member.ban()
                 await ctx.message.add_reaction('\u2705')
@@ -98,7 +110,9 @@ class Admin:
  
     @commands.command(aliases=['ar','updaterole'])
     async def changerole(self,ctx,member:discord.Member,role:discord.Role):
-        '''to add/remove a role from a person'''
+        '''to add/remove a role from a person
+    Usage:
+    q!changerole [member] [role]'''
         try:
             if role not in member.roles:await ctx.author.add_roles(role)
             else:await ctx.author.remove_roles(role)
@@ -110,7 +124,9 @@ class General:
     '''commands available for everyone'''           
     @commands.command(pass_context=True)
     async def ping(self, ctx):
-        '''Call the bot'''
+        '''Call the bot
+    Usage:
+    q!ping'''
         msg = await ctx.send('Pong!')
         res = msg.created_at - ctx.message.created_at
         res = tdm(res)
@@ -119,23 +135,30 @@ class General:
  
     @commands.command()
     async def say(self, ctx, *, something='Quantum Bot here!!'):
-        '''The bot becomes your copycat'''
+        '''The bot becomes your copycat
+    Usage:
+    q!say <text>'''
         await ctx.send(something)
         await ctx.message.delete()
  
     @commands.command()
     async def now(self, ctx):
-        '''Get current date and time'''
+        '''Get current date and time
+    Usage:
+    q!now'''
         m = str(datetime.datetime.now()).split()
         embed=discord.Embed(title="Date-time information",color=eval(hex(ctx.author.color.value)))
         embed.add_field(name="Date",value="{}".format(m[0]))
         embed.add_field(name="Time",value="{}GMT".format(m[1]))
         await ctx.send(embed=embed)
         
-class Feedback: 
+class Feedback:
+    '''feedback related commands'''
     @commands.command(aliases=['fb'])
     async def feedback(self,ctx,*,message):
-        '''My bot is not very good, feedback is appreciated!'''
+        '''My bot is not very good, feedback is appreciated!
+    Usage:
+    q!feedback [text]'''
         author=ctx.message.author.name+" said in "+"'"+ctx.guild.name+"'"
         await bot.get_guild(413290013254615041).get_channel(413631317272690688).send(embed=discord.Embed(color=eval(hex(ctx.author.color.value)),title=author,description="#"+ctx.channel.name+":\n"+message))
         await ctx.message.add_reaction('\u2705')
@@ -339,11 +362,71 @@ class Fun:
 
     @commands.command()
     async def think(self,ctx):
-        '''let the bot think for a while'''
+        '''let the bot think for a while
+    Usage:
+    q!think'''
         await ctx.message.delete()
         await ctx.send(discord.utils.get(bot.emojis,name='fidgetthink'))
 
+    @commands.command()
+    async def morse(self,ctx,*,message):
+        '''Converts your ENGLISH message to morse. And vice versa.
+    Add an e to say it's English and m to say it's morse.
+    Usage:
+    q!morse e|THONK
+    q!morse m|-----/.-/.-'''
+
+        CODE = {'A': '.-',     'B': '-...',   'C': '-.-.', 
+        'D': '-..',    'E': '.',      'F': '..-.',
+        'G': '--.',    'H': '....',   'I': '..',
+        'J': '.---',   'K': '-.-',    'L': '.-..',
+        'M': '--',     'N': '-.',     'O': '---',
+        'P': '.--.',   'Q': '--.-',   'R': '.-.',
+     	'S': '...',    'T': '-',      'U': '..-',
+        'V': '...-',   'W': '.--',    'X': '-..-',
+        'Y': '-.--',   'Z': '--..',
         
+        '0': '-----',  '1': '.----',  '2': '..---',
+        '3': '...--',  '4': '....-',  '5': '.....',
+        '6': '-....',  '7': '--...',  '8': '---..',
+        '9': '----.',
+
+        ' ':'/', '.':'.-.-.-', ',':'--..--',
+        ':':'---...', '?':'..--..', "'":'.----.',
+        '-':'-....-', '/':'-..-.', '@': '.--.-.',
+        '=':'-...-', '(':'-.--.', ')':'-.--.-',
+        '+':'.-.-.'}
+
+        REVERSE_CODE = {CODE[i]:i for i in CODE}
+        a = ""
+        scope = ""
+        if message[1]!="|" or message[0].lower() not in "me":await ctx.send(embed=discord.Embed(title="Morse conversion failed!",description="You did not specify whether you want it Morse or English",colour=discord.Colour.red()))
+        else:
+            await ctx.send(message[2:])
+            if message[0].lower()=="m":
+                for i in message[2:].upper():
+                    if i not in CODE.keys():
+                        await ctx.send(embed=discord.Embed(title="Morse conversion failed!",description="Unidentified character spotted!",colour=discord.Colour.red()))
+                        break
+                    else:
+                        a+=CODE[i]
+            else:
+                for i in message[2:]:
+                    scope+=i
+                    if scope in REVERSE_CODE.keys():
+                        a+=REVERSE_CODE[scope]
+                        scope=""
+                    elif i not in r"\-.":
+                        await ctx.send(embed=discord.Embed(title="Morse conversion failed!",description="Unidentified character spotted!",colour=discord.Colour.red()))
+                        break
+                    elif len(scope)>6:
+                        await ctx.send(title="Morse conversion failed!",description="Unidentified character spotted!",colour=discord.Colour.red())
+                        break
+        m=len(a)//1900
+        for x in range(m):
+                await ctx.send(embed=discord.Embed(title="Page {}/{} of Morse Translation".format(x+1,m+1),description="```\n"+a[1900*x:1900*(x+1)]+"```",colour=discord.Colour.dark_gold()))
+        await ctx.send(embed=discord.Embed(title="Page {}/{} of Morse Translation".format(m+1,m+1),description="```\n"+a[1900*m:]+"```",colour=discord.Colour.dark_gold()))
+
     @commands.command()
     async def emojify(self, ctx, *, text='Hello'):
         '''all *English* letters and numbers turn into emojis!'''
@@ -399,11 +482,14 @@ class Owner:
     async def clear(self, ctx, number=2, author:discord.Member=None):
         '''[WIP] clears messages from a channel, if you're allowed'''
         allowed = [360022804357185537, 270149861398151169]
-        if ctx.author.id in allowed:
+        if ctx.author.id in allowed or ctx.author.guild_permissions.manage_messages:
             if author is not None:
                     check=lambda x:x.author==author
-                    await ctx.channel.purge(limit=number,check=check)
-            else:await ctx.channel.purge(limit=number)
+                    await ctx.channel.purge(limit=number+1,check=check)
+                    await ctx.send("Purged %d messages from %s"%(number,author),delete_after=3)
+            else:
+                    await ctx.channel.purge(limit=number+1)
+                    await ctx.send("Purged %d messages in this channel"%number,delete_after=3)
         else:
             await ctx.send("You're not approved by the bot owner to delete stuff!")
  
@@ -604,6 +690,18 @@ async def on_member_remove(member):
 async def on_command_error(ctx,error):
     embed=discord.Embed(title=str(type(error))[8:-2],description=str(error),colour=discord.Colour.from_rgb(random.randint(0,255),random.randint(0,255),random.randint(0,255)))
     await ctx.send("***Roses are red, violets are blue, there is an error when the command is used by you***",embed=embed,delete_after=15)
+
+@bot.event
+async def on_guild_join(guild):
+    embed=discord.Embed(title="Guild joined!",colour=discord.Colour.green())
+    embed.add_field(name=guild.name,value="Owner:%s"%guild.owner)
+    await bot.get_guild(413290013254615041).get_channel(463261256355282944).send(embed=embed)
+
+@bot.event
+async def on_guild_remove(guild):
+    embed=discord.Embed(title="Guild left :(",colour=discord.Colour.red())
+    embed.add_field(name=guild.name,value="Owner:%s"%guild.owner)
+    await bot.get_guild(413290013254615041).get_channel(463261256355282944).send(embed=embed)
 
 @bot.event
 async def on_message(message):
