@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "quantumbase-209315",
+  "private_key_id": "ca2e03e56485140b9a9fdca785ec094fe20f9e89",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCj2Hwx0RH7G5hT\nEmtCodAQIzeeC8tfx9TT/42rjIpoQXRsuy33YJjbhPnTj4t6yysuQbw7a/NTldse\nmQerl7HB8gjAUXzkg0dYeQAAEzSDG7OpZcjHLgqyOEOvSpvcKBkRBvcSo3mVzRAm\nXPCvXJVBluAY5FRvgp0Y38ceHCuFZJeU0Dg6M7cQ4Vbt8B32LRe9bqToAHInLQGx\nJFlx40ko4oLv5GM9ijCsV7Z+PLUr/AxnKIycU+QCTAJY1qakiX2Jvx6wiIxRqIVs\n5A35A2+ffb9Is+hXnaP7NzqevO7H5OM1OQWe4tOD4aeIXl4787KolU6axREt2YKI\nf+O6CfNfAgMBAAECggEAUKmtJvdnU0kYGlm4jaLNJIy5/miPFNX0DPTEwd6ca0xC\nLZ+PNzkKuBQEzGdggzEPzqOVMGnqbs2ZhTxQnuU9IZ7vOQNFKdkJoGBdpCvQT/Ws\n4ypViN29bVUu2VcxWVcyVAQqUjZCDwJYP5LE+YhqgNJu/EI44XcbsVnGFShIMtBy\n3k1bLdEYUSA5OnQZclZvVq9fY1Ir4FuuIAQpsoGDSO4WfEFgRsh4yCZxGO55SZgi\nFCQOTn5GE0chgo6YMZwENmJWq8eHVjOaYE4Gg6b55BRwf3tNSmZD+qem46FKsCSl\n8AwEdODe3EQNt8v8EYyTQedkQoMAgLTUMsdisfZvsQKBgQDjayvVCcilPJLKIox4\nnqheqiDUGYreFZwuKG88cnnWVmovaeZ7Aff9OlOUbgEpspoULHiWLtQA713dov2g\nRQnaqz7ORZjP5RI4sp+BeExw5Z7NwUBwfZuRrG/gVulZ1w6YMk7bxfusVGje0ANu\nlV/9YkpGSXZo8BQsaxf22ykzLwKBgQC4b/SFcM3J4drCnb90rz8Lo9bwCvFgpj6N\n8ZMKi30IRnji5UX7r8bPQauC96rFjrkSgoQ9jChSfhpN2EdAdZQRmUPdhsPNX80g\nPHDK5s+egD+eqKFh6lEcdd/gqd7ixR2jfpS0rz2d0du365H9euilx2GDa70aqnQw\nGagB/0j20QKBgAwP3x9JiY7aC58U/gZXw+5hb6RQRoFI/COmmV/HYpbvtmoVX9ge\nXpzbvxscSot/oZR4V1z/1tbF22CqCHG7t64VbxtZraU5LSI8tyES1FsYkrevDE/r\nGZk8YCKx+WZ+dZO092HIunSFdZp7xfLTkWfLEs1vkAw4z5kbhQXe0eyZAoGBAIh4\nprj6X/tKuGEa8mi3p3HIeKlDn5mBSXYkU0YRMqIl6xsQxTjXtsby86LD+cOWuNC+\nbHVSOR/ZGUOSjh5fIgHno3TOXCGiCpkYv+kS4nuIsAqJAmj+RahGfDKz3y1y51xr\ntEMCDBi0CN1NXMfv4yePoVLqLJIHoFNbGJrpt6aRAoGAYoizYVWloz2LLLfTD1OF\nABpou/DV1it2vUwHNGDOKWgLmEvqywnlsY6LMO+vKNX4oRhQWMLPW82CHh1raX86\nygOLBlUgdm7YeQaUfM7p0fNJAGAQPoX41hE1PSJ7nQ4kQQwhp2UsAH6nSKGbTIeG\nTJRUpBs3ANeZyZXDbBD06ek=\n-----END PRIVATE KEY-----\n",
+  "client_email": "quantumbot@quantumbase-209315.iam.gserviceaccount.com",
+  "client_id": "115817193946627855377",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://accounts.google.com/o/oauth2/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/quantumbot%40quantumbase-209315.iam.gserviceaccount.com"
+}

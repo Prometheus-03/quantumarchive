@@ -479,7 +479,7 @@ class Owner:
             await bot.logout()
  
     @commands.command()
-    async def clear(self, ctx, number=2, author:discord.Member=None):
+    async def clear(self, ctx, number=1, author:discord.Member=None):
         '''[WIP] clears messages from a channel, if you're allowed'''
         allowed = [360022804357185537, 270149861398151169]
         if ctx.author.id in allowed or ctx.author.guild_permissions.manage_messages:
@@ -716,6 +716,7 @@ async def on_message_edit(before,after):
 async def on_ready():
     bot.remove_command('help')
     bot.load_extension('code2')
+    bot.load_extension('databasetest')
     bot.add_cog(Owner())
     bot.add_cog(Pystuff())
     bot.add_cog(Information())
@@ -727,7 +728,10 @@ async def on_ready():
     bot.add_cog(Media())
     await bot.change_presence(activity=discord.Game(name='Type [q?help] for help', type=2),status=discord.Status.dnd)
     f=bot.get_guild(413290013254615041).get_channel(436548366088798219)
-    await f.send(embed=discord.Embed(title="Bot reawakened at: ",description=f"{datetime.datetime.utcnow(): %B %d, %Y at %H:%M:%S GMT}"))
+    if __file__=="/app/code2.py":
+        await f.send(embed=discord.Embed(title="Bot Updated on:",description=f"{datetime.datetime.utcnow(): %B %d, %Y at %H:%M:%S GMT}",colour=discord.Colour.dark_gold()))
+    else:
+        await f.send(embed=discord.Embed(title="Beta Bot Update tested on:",description=f"{datetime.datetime.utcnow(): %B %d, %Y at %H:%M:%S GMT}",colour=discord.Colour.blue()))
     async def change_activities():
         timeout = 5 #Here you can change the delay between changes 
         while True:
