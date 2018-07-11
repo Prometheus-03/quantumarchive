@@ -277,6 +277,8 @@ Server Region:{}\nMember count:{}\nOwner:{}\nCreated On:{}\nNumber of text chann
     async def help(self,ctx,command=None):
       '''bot help message
     Usage:
+    q!help --> general help message
+    q!help [command] --> specific help message
       '''
       if command in [i.name for i in bot.commands]:
         f=inspect.getsource(bot.get_command(command).callback)
@@ -289,8 +291,9 @@ Server Region:{}\nMember count:{}\nOwner:{}\nCreated On:{}\nNumber of text chann
         message={}
         embeds=[]
         for i in bot.cogs.keys():
-                if i!='REPL':command_list.update({i:(m for m in dir(bot.get_cog(i))[26:])})
-                else:command_list.update({'REPL':('exec','repl')})
+                if i not in ["REPL","Database"]:command_list.update({i:list(m for m in dir(bot.get_cog(i))[26:])})
+                elif i=="REPL":command_list.update({'REPL':['exec','repl']})
+                elif i=="Database":command_list.update({'Database':['bump', 'dailies']})
         for i in bot.commands:
                 f=inspect.getsource(bot.get_command(str(i)).callback)
                 m=list(find("'''",f))
@@ -299,7 +302,7 @@ Server Region:{}\nMember count:{}\nOwner:{}\nCreated On:{}\nNumber of text chann
         for i in command_list.keys():
                 embed=discord.Embed(title=i+" help",inline=False,colour=ctx.author.colour)
                 for m in command_list[i]:
-                      embed.add_field(name=m,value=message[m],inline=False)
+                        embed.add_field(name=m,value=message[m],inline=False)
                 embeds.append(embed)
         #till now we got the embeds, now for paginator
         info_embed=discord.Embed(title="Quantum Bot help message",description="""Please press:
@@ -685,12 +688,12 @@ async def on_member_remove(member):
         embed.add_field(name="Bot",value=member.bot)
         embed.add_field(name="Member id",value=member.id)
         await member.guild.get_channel(413303508289454081).send(embed=embed)
-
+'''
 @bot.event
 async def on_command_error(ctx,error):
     embed=discord.Embed(title=str(type(error))[8:-2],description=str(error),colour=discord.Colour.from_rgb(random.randint(0,255),random.randint(0,255),random.randint(0,255)))
     await ctx.send("***Roses are red, violets are blue, there is an error when the command is used by you***",embed=embed,delete_after=15)
-
+'''
 @bot.event
 async def on_guild_join(guild):
     embed=discord.Embed(title="Guild joined!",colour=discord.Colour.green())
