@@ -163,11 +163,6 @@ class Feedback:
         await bot.get_guild(413290013254615041).get_channel(413631317272690688).send(embed=discord.Embed(color=eval(hex(ctx.author.color.value)),title=author,description="#"+ctx.channel.name+":\n"+message))
         await ctx.message.add_reaction('\u2705')
 
-    @commands.command(aliases=['p'])
-    async def poll(self,ctx,*,question):
-        '''whenever you need opinions, use this!'''
-        await ctx.send('This command will work in the future :)')
-
     @commands.command()
     async def suggest(self,ctx,command,*,description):
         '''suggest commands I should work on, and follow by a short description on how it works'''
@@ -669,6 +664,19 @@ class Media:
                     await ctx.send(embed=embed)
         except:
                 await ctx.send("An error occurred. Please try again.",delete_after=3)
+
+    @commands.command()
+    async def qrcode(self,ctx,*,message="Please provide an argument"):
+        try:
+            async with ctx.typing():
+                url="http://api.qrserver.com/v1/create-qr-code/?"
+                add=urllib.parse.urlencode({'size':'300x300','data':message})
+                send=(url+add).replace(' ','')
+                embed=discord.Embed(title=ctx.author.name+", here is your QR Code!",colour=ctx.author.colour)
+                embed.set_footer(text="Used **api.qrserver.com** API")
+                embed.set_image(url=send)
+            await ctx.send(embed=embed)
+        except:await ctx.send("An error occurred. Please try again.",delete_after=3)
 # everything from here onwards are bot events
 
 @bot.event
@@ -688,12 +696,12 @@ async def on_member_remove(member):
         embed.add_field(name="Bot",value=member.bot)
         embed.add_field(name="Member id",value=member.id)
         await member.guild.get_channel(413303508289454081).send(embed=embed)
-'''
+
 @bot.event
 async def on_command_error(ctx,error):
     embed=discord.Embed(title=str(type(error))[8:-2],description=str(error),colour=discord.Colour.from_rgb(random.randint(0,255),random.randint(0,255),random.randint(0,255)))
     await ctx.send("***Roses are red, violets are blue, there is an error when the command is used by you***",embed=embed,delete_after=15)
-'''
+
 @bot.event
 async def on_guild_join(guild):
     embed=discord.Embed(title="Guild joined!",colour=discord.Colour.green())
