@@ -1,8 +1,7 @@
-import asyncio,discord,math,random,time,datetime,aiohttp,functools,inspect,re,io,contextlib
+import asyncio,discord,math,random,time,datetime,aiohttp,functools,inspect,re,io,contextlib,traceback,sys
 from discord.ext import commands
 import urllib.request
 import urllib.parse
-from googlesearch import search
 blacklisted=[]
 #my own utilities
 def tdm(td):
@@ -667,6 +666,10 @@ class Media:
 
     @commands.command()
     async def qrcode(self,ctx,*,message="Please provide an argument"):
+        '''Generate a QR Code
+    Usage:
+    Q!qrcode <message="Please provide an argument"> --> Returns a QR Code that gives that message
+    '''
         try:
             async with ctx.typing():
                 url="http://api.qrserver.com/v1/create-qr-code/?"
@@ -701,6 +704,8 @@ async def on_member_remove(member):
 async def on_command_error(ctx,error):
     embed=discord.Embed(title=str(type(error))[8:-2],description=str(error),colour=discord.Colour.from_rgb(random.randint(0,255),random.randint(0,255),random.randint(0,255)))
     await ctx.send("***Roses are red, violets are blue, there is an error when the command is used by you***",embed=embed,delete_after=15)
+    for i in (traceback.format_exception(None, error, error.__traceback__)):
+        print(i,end="")
 
 @bot.event
 async def on_guild_join(guild):
@@ -750,5 +755,6 @@ async def on_ready():
             await bot.change_presence(activity=discord.Game(possb,status=discord.Status.dnd))
             await asyncio.sleep(timeout)
     bot.loop.create_task(change_activities())
+    
 bot.run('Mzg0NjIzOTc4MDI4ODU5Mzky.DZecOA.rekvrUSZL8q9QVzlIlnoS0lNYVI')
 #ok
