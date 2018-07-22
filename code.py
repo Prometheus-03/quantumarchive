@@ -744,7 +744,7 @@ async def on_message_edit(before,after):
 async def on_reaction_add(reaction,user):
     if reaction.message.channel.id==470431050649305098:
         member=discord.utils.get(user.guild.roles,name="Member")
-        await member.add_roles(member)
+        await user.add_roles(member)
         
 @bot.event
 async def on_ready():
