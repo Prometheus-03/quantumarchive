@@ -690,6 +690,12 @@ async def on_member_join(member):
         embed.add_field(name="Bot",value=member.bot)
         embed.add_field(name="Member id",value=member.id)
         await member.guild.get_channel(413303508289454081).send(embed=embed)
+    elif member.guild.id==470430655872892928:
+        embed=discord.Embed(title="Welcome to Bot Emotes Inc.",description="Welcome "+member.mention+"! Please read the "+member.guild.get_channel(470431050649305098).mention+" and react with \u2705 to confirm that you agree to the rules.",colour=discord.Colour.dark_gold())
+        embed.set_thumbnail(url=member.avatar_url)
+        embed.add_field(name="Member count",value=len(member.guild.members))
+        embed.add_field(name="Bot",value=member.bot)
+        await member.guild.get_channel(470431623079264258).send(embed=embed)
         
 @bot.event
 async def on_member_remove(member):
@@ -699,6 +705,12 @@ async def on_member_remove(member):
         embed.add_field(name="Bot",value=member.bot)
         embed.add_field(name="Member id",value=member.id)
         await member.guild.get_channel(413303508289454081).send(embed=embed)
+    elif member.guild.id==470430655872892928:
+        embed=discord.Embed(title="Goodbye from Bot Emotes Inc.",description="Goodbye "+member.name+"! We hope you had a nice stay and had fun!",colour=discord.Colour.red())
+        embed.set_thumbnail(url=member.avatar_url)
+        embed.add_field(name="Member count",value=len(member.guild.members))
+        embed.add_field(name="Bot",value=member.bot)
+        await member.guild.get_channel(470431623079264258).send(embed=embed)
 
 @bot.event
 async def on_command_error(ctx,error):
@@ -728,6 +740,12 @@ async def on_message(message):
 async def on_message_edit(before,after):
         await bot.process_commands(after)
 
+@bot.event
+async def on_reaction_add(reaction,user):
+    if reaction.message.channel.id==470431050649305098:
+        member=discord.utils.get(user.guild.roles,name="Member")
+        await member.add_roles(member)
+        
 @bot.event
 async def on_ready():
     bot.remove_command('help')
