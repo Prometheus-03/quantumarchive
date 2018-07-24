@@ -680,7 +680,7 @@ class Media:
     q!dictionary [word] --> definitions of the word'''
         
         language = 'en'
-        word_id = 'word'
+        word_id = word
         url = 'https://od-api.oxforddictionaries.com:443/api/v1/entries/' + language     + '/' + word_id.lower()
         r = __import__("requests").get(url, headers = {'app_id': info.dict_app_id, 'app_key': info.dict_app_key})
         #__import__("pprint").pprint(r.json())
