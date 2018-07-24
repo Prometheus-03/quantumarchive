@@ -31,10 +31,17 @@ async def getjson(url):
                         f = await response.json(encoding='utf8')
         return f
 #configs
-owner_id=360022804357185537
-bot_id=384623978028859392
-prefixes=('q!', 'q>', 'q<', 'q+', 'q-', 'q*', 'q/', 'q?', 'q.', 'q,', 'q:', 'q;','Q!', 'Q>', 'Q<', 'Q+', 'Q-', 'Q*', 'Q/', 'Q?', 'Q.', 'Q,', 'Q:', 'Q;', 'quantum ', 'quantuM ', 'quantUm ', 'quantUM ', 'quanTum ', 'quanTuM ', 'quanTUm ', 'quanTUM ', 'quaNtum ', 'quaNtuM ', 'quaNtUm ', 'quaNtUM ', 'quaNTum ', 'quaNTuM ', 'quaNTUm ', 'quaNTUM ', 'quAntum ', 'quAntuM ', 'quAntUm ', 'quAntUM ', 'quAnTum ', 'quAnTuM ', 'quAnTUm ', 'quAnTUM ', 'quANtum ', 'quANtuM ', 'quANtUm ', 'quANtUM ', 'quANTum ', 'quANTuM ', 'quANTUm ', 'quANTUM ', 'qUantum ', 'qUantuM ', 'qUantUm ', 'qUantUM ', 'qUanTum ', 'qUanTuM ', 'qUanTUm ', 'qUanTUM ', 'qUaNtum ', 'qUaNtuM ', 'qUaNtUm ', 'qUaNtUM ', 'qUaNTum ', 'qUaNTuM ', 'qUaNTUm ', 'qUaNTUM ', 'qUAntum ', 'qUAntuM ', 'qUAntUm ', 'qUAntUM ', 'qUAnTum ', 'qUAnTuM ', 'qUAnTUm ', 'qUAnTUM ', 'qUANtum ', 'qUANtuM ', 'qUANtUm ', 'qUANtUM ', 'qUANTum ', 'qUANTuM ', 'qUANTUm ', 'qUANTUM ', 'Quantum ', 'QuantuM ', 'QuantUm ', 'QuantUM ', 'QuanTum ', 'QuanTuM ', 'QuanTUm ', 'QuanTUM ', 'QuaNtum ', 'QuaNtuM ', 'QuaNtUm ', 'QuaNtUM ', 'QuaNTum ', 'QuaNTuM ', 'QuaNTUm ', 'QuaNTUM ', 'QuAntum ', 'QuAntuM ', 'QuAntUm ', 'QuAntUM ', 'QuAnTum ', 'QuAnTuM ', 'QuAnTUm ', 'QuAnTUM ', 'QuANtum ', 'QuANtuM ', 'QuANtUm ', 'QuANtUM ', 'QuANTum ', 'QuANTuM ', 'QuANTUm ', 'QuANTUM ', 'QUantum ', 'QUantuM ', 'QUantUm ', 'QUantUM ', 'QUanTum ', 'QUanTuM ', 'QUanTUm ', 'QUanTUM ', 'QUaNtum ', 'QUaNtuM ', 'QUaNtUm ', 'QUaNtUM ', 'QUaNTum ', 'QUaNTuM ', 'QUaNTUm ', 'QUaNTUM ', 'QUAntum ', 'QUAntuM ', 'QUAntUm ', 'QUAntUM ', 'QUAnTum ', 'QUAnTuM ', 'QUAnTUm ', 'QUAnTUM ', 'QUANtum ', 'QUANtuM ', 'QUANtUm ', 'QUANtUM ', 'QUANTum ', 'QUANTuM ', 'QUANTUm ', 'QUANTUM ')
-bot = commands.Bot(description='Tune in to lots of fun with this bot!', command_prefix=commands.when_mentioned_or(*prefixes))
+
+class Information:
+  def __init__(self):
+    self.owner_id=360022804357185537
+    self.bot_id=384623978028859392
+    self.dict_app_id = 'ebbdd492'
+    self.prefixes=('q!', 'q>', 'q<', 'q+', 'q-', 'q*', 'q/', 'q?', 'q.', 'q,', 'q:', 'q;','Q!', 'Q>', 'Q<', 'Q+', 'Q-', 'Q*', 'Q/', 'Q?', 'Q.', 'Q,', 'Q:', 'Q;', 'quantum ', 'quantuM ', 'quantUm ', 'quantUM ', 'quanTum ', 'quanTuM ', 'quanTUm ', 'quanTUM ', 'quaNtum ', 'quaNtuM ', 'quaNtUm ', 'quaNtUM ', 'quaNTum ', 'quaNTuM ', 'quaNTUm ', 'quaNTUM ', 'quAntum ', 'quAntuM ', 'quAntUm ', 'quAntUM ', 'quAnTum ', 'quAnTuM ', 'quAnTUm ', 'quAnTUM ', 'quANtum ', 'quANtuM ', 'quANtUm ', 'quANtUM ', 'quANTum ', 'quANTuM ', 'quANTUm ', 'quANTUM ', 'qUantum ', 'qUantuM ', 'qUantUm ', 'qUantUM ', 'qUanTum ', 'qUanTuM ', 'qUanTUm ', 'qUanTUM ', 'qUaNtum ', 'qUaNtuM ', 'qUaNtUm ', 'qUaNtUM ', 'qUaNTum ', 'qUaNTuM ', 'qUaNTUm ', 'qUaNTUM ', 'qUAntum ', 'qUAntuM ', 'qUAntUm ', 'qUAntUM ', 'qUAnTum ', 'qUAnTuM ', 'qUAnTUm ', 'qUAnTUM ', 'qUANtum ', 'qUANtuM ', 'qUANtUm ', 'qUANtUM ', 'qUANTum ', 'qUANTuM ', 'qUANTUm ', 'qUANTUM ', 'Quantum ', 'QuantuM ', 'QuantUm ', 'QuantUM ', 'QuanTum ', 'QuanTuM ', 'QuanTUm ', 'QuanTUM ', 'QuaNtum ', 'QuaNtuM ', 'QuaNtUm ', 'QuaNtUM ', 'QuaNTum ', 'QuaNTuM ', 'QuaNTUm ', 'QuaNTUM ', 'QuAntum ', 'QuAntuM ', 'QuAntUm ', 'QuAntUM ', 'QuAnTum ', 'QuAnTuM ', 'QuAnTUm ', 'QuAnTUM ', 'QuANtum ', 'QuANtuM ', 'QuANtUm ', 'QuANtUM ', 'QuANTum ', 'QuANTuM ', 'QuANTUm ', 'QuANTUM ', 'QUantum ', 'QUantuM ', 'QUantUm ', 'QUantUM ', 'QUanTum ', 'QUanTuM ', 'QUanTUm ', 'QUanTUM ', 'QUaNtum ', 'QUaNtuM ', 'QUaNtUm ', 'QUaNtUM ', 'QUaNTum ', 'QUaNTuM ', 'QUaNTUm ', 'QUaNTUM ', 'QUAntum ', 'QUAntuM ', 'QUAntUm ', 'QUAntUM ', 'QUAnTum ', 'QUAnTuM ', 'QUAnTUm ', 'QUAnTUM ', 'QUANtum ', 'QUANtuM ', 'QUANtUm ', 'QUANtUM ', 'QUANTum ', 'QUANTuM ', 'QUANTUm ', 'QUANTUM ')
+    self.dict_app_key = 'b9942f0306456037953c7481b7f036ca'
+
+info=Information()
+bot = commands.Bot(description='Tune in to lots of fun with this bot!', command_prefix=commands.when_mentioned_or(*info.prefixes))
 #commands
 class Math:
     '''for mathematical fun'''
@@ -169,7 +176,7 @@ class Feedback:
         m=await bot.get_guild(413290013254615041).get_channel(413631317272690688).send(embed=discord.Embed(title=author+" suggested a command '"+command+"'",description=description,color=ctx.author.color))
         await m.add_reaction("\u2705")
         await m.add_reaction("\u274C")
-        r=await bot.wait_for('reaction_add',check=lambda reaction,author:(author.id==owner_id) and (reaction.emoji in ["\u2705","\u274C"]))
+        r=await bot.wait_for('reaction_add',check=lambda reaction,author:(author.id==info.owner_id) and (reaction.emoji in ["\u2705","\u274C"]))
         if r[0].emoji=="\u2705":
             await ctx.author.send("Your command {} has been accepted by the owner.".format(command))
             await m.edit(embed=discord.Embed(title="Command to work on: "+command,description=description))
@@ -191,8 +198,8 @@ class Information:
     @commands.command()
     async def prefix(self, ctx):
         '''list of all prefixes my bot uses'''
-        prefixlist=tuple(["@Quantum Bot"]+list(prefixes))
-        await ctx.send("```"+",".join(list(prefixlist))+"```"+'\n'+str(len(prefixlist))+" prefixes! :joy:")
+        prefixlist=tuple(["@Quantum Bot"]+list(info.prefixes))
+        await ctx.send("```"+",".join(list(prefixlist))+"```"+'\n'+str(len(prefixlist))+" prefixes")
  
     @commands.command()
     async def invite(self, ctx):
@@ -266,8 +273,9 @@ Server Region:{}\nMember count:{}\nOwner:{}\nCreated On:{}\nNumber of text chann
                 return "\n".join(dict(user.guild_permissions).keys())
         await ctx.send(permlist[perm]*"\u2705"+(1-permlist[perm])*"\u274C")
         return permlist[perm]
- 
+
     @commands.command(aliases=["h"])
+    @commands.guild_only()
     async def help(self,ctx,command=None):
       '''bot help message
     Usage:
@@ -450,7 +458,7 @@ class Fun:
     async def rip(self, ctx, member:discord.Member=None):
         '''Rest in piece, my comrade'''
         if member is None:member=ctx.author
-        elif member.id==owner_id or member.id==bot_id:member=ctx.author
+        elif member.id==info.owner_id or member.id==info.bot_id:member=ctx.author
         embed=discord.Embed(title="RIP {}{}".format(member.name,discord.utils.get(bot.emojis,name="rip")),description="Press :regional_indicator_f: to pay your respects",colour=discord.Colour.from_rgb(255,255,255))
         embed.set_thumbnail(url=member.avatar_url)
         p=await ctx.send(embed=embed)
@@ -460,8 +468,8 @@ class Fun:
     async def playing(self, ctx):
         '''returns the current bot status'''
         async with ctx.typing():
-            embed=discord.Embed(title="Quantum Bot's status:",description=ctx.guild.get_member(bot_id).activity.name)
-            embed.set_thumbnail(url=ctx.guild.get_member(bot_id).avatar_url)
+            embed=discord.Embed(title="Quantum Bot's status:",description=ctx.guild.get_member(info.bot_id).activity.name)
+            embed.set_thumbnail(url=ctx.guild.get_member(info.bot_id).avatar_url)
         await ctx.send(embed=embed)
         
 class Owner:
@@ -469,7 +477,7 @@ class Owner:
     @commands.command(pass_context=True)
     async def shutdown(self, ctx):
         '''for me to close the bot'''
-        if ctx.message.author.id!=owner_id:
+        if ctx.message.author.id!=info.owner_id:
             await ctx.send("You're not the bot owner!")
         else:
             await ctx.send("Shutting down...")
@@ -493,7 +501,7 @@ class Owner:
     @commands.command()
     async def getsource(self, ctx, command):
         '''getting the code for command'''
-        if ctx.author.id==owner_id:
+        if ctx.author.id==info.owner_id:
             a=inspect.getsource(bot.get_command(command).callback)
             m=len(a)//1900
             for x in range(m):
@@ -505,7 +513,7 @@ class Owner:
     @commands.command(pass_context=True)
     async def warn(self,ctx,member:discord.Member,serious:bool,*,reason):
             '''for owner to issue warnings'''
-            if ctx.author.id==owner_id:
+            if ctx.author.id==info.owner_id:
                 if serious:
                     await ctx.guild.get_member(member.id).send(embed=discord.Embed(title="Warning! [SERIOUS]",description="**My bot owner warned your because**:{}".format(reason),colour=discord.Colour(0xFF0000)))
                 else:
@@ -517,7 +525,7 @@ class Pystuff():
             '''list of methods of a given object
     Usage:
     q!pydir [object]'''
-            if ctx.message.author.id!=owner_id:
+            if ctx.message.author.id!=info.owner_id:
                 await ctx.send(embed=discord.Embed(title="Error message",color=eval(hex(ctx.author.color.value)),description="Not allowed!"))
             else:                
                 if command is None:await ctx.send("Argument [command name] must be provided!")
@@ -540,7 +548,7 @@ class Pystuff():
             '''the Python help message for a given object
     Usage:
     q!pyhelp [object]'''
-            if ctx.message.author.id!=owner_id:
+            if ctx.message.author.id!=info.owner_id:
                 await ctx.send(embed=discord.Embed(title="Error message",color=eval(hex(ctx.author.color.value)),description="Not allowed!"))
             else:
                 if command is None:await ctx.send("Argument [command name] must be provided!")
@@ -664,6 +672,31 @@ class Media:
         except:
                 await ctx.send("An error occurred. Please try again.",delete_after=3)
 
+    @commands.cooldown(rate=1,per=8,type=commands.BucketType.guild)
+    @commands.command(aliases=['define','def','dict'])
+    async def dictionary(self, ctx, word):
+        '''search Oxford Dictionaries to get the definition you need
+    Usage:
+    q!dictionary [word] --> definitions of the word'''
+        
+        language = 'en'
+        word_id = 'word'
+        url = 'https://od-api.oxforddictionaries.com:443/api/v1/entries/' + language     + '/' + word_id.lower()
+        r = __import__("requests").get(url, headers = {'app_id': info.dict_app_id, 'app_key': info.dict_app_key})
+        #__import__("pprint").pprint(r.json())
+        definitions=[]
+        for i in r.json()["results"]:
+            for j in i["lexicalEntries"]:
+                for k in j["entries"]:
+                    for v in k["senses"]:
+                        definitions.append(v["definitions"][0])
+        embed=discord.Embed(title="Definitions for the word %s"%word,colour=discord.Colour.blue())
+        desc_text="\n".join([str(a+1)+". "+b for (a,b) in enumerate(definitions)])
+        embed.description=desc_text
+        embed.set_footer(text="Using **Oxford Dictionaries** API")
+        await ctx.send(embed=embed)
+        print("code {}\n".format(r.status_code))
+
     @commands.command()
     async def qrcode(self,ctx,*,message="Please provide an argument"):
         '''Generate a QR Code
@@ -680,6 +713,7 @@ class Media:
                 embed.set_image(url=send)
             await ctx.send(embed=embed)
         except:await ctx.send("An error occurred. Please try again.",delete_after=3)
+
 # everything from here onwards are bot events
 
 @bot.event
@@ -713,6 +747,12 @@ async def on_member_remove(member):
         await member.guild.get_channel(470431623079264258).send(embed=embed)
 
 @bot.event
+async def on_reaction_add(reaction,user):
+    if reaction.message.channel.id==470431050649305098:
+        member=discord.utils.get(user.guild.roles,name="Member")
+        await user.add_roles(member)
+
+@bot.event
 async def on_command_error(ctx,error):
     embed=discord.Embed(title=str(type(error))[8:-2],description=str(error),colour=discord.Colour.from_rgb(random.randint(0,255),random.randint(0,255),random.randint(0,255)))
     await ctx.send("***Roses are red, violets are blue, there is an error when the command is used by you***",embed=embed,delete_after=15)
@@ -739,18 +779,11 @@ async def on_message(message):
 @bot.event
 async def on_message_edit(before,after):
         await bot.process_commands(after)
-
-@bot.event
-async def on_reaction_add(reaction,user):
-    if reaction.message.channel.id==470431050649305098:
-        member=discord.utils.get(user.guild.roles,name="Member")
-        await user.add_roles(member)
         
 @bot.event
 async def on_ready():
     bot.remove_command('help')
     bot.load_extension('code2')
-    bot.load_extension('databasetest')
     bot.add_cog(Owner())
     bot.add_cog(Pystuff())
     bot.add_cog(Information())
@@ -766,10 +799,11 @@ async def on_ready():
         await f.send(embed=discord.Embed(title="Bot Updated on:",description=f"{datetime.datetime.utcnow(): %B %d, %Y at %H:%M:%S GMT}",colour=discord.Colour.dark_gold()))
     else:
         await f.send(embed=discord.Embed(title="Beta Bot Update tested on:",description=f"{datetime.datetime.utcnow(): %B %d, %Y at %H:%M:%S GMT}",colour=discord.Colour.blue()))
+    print("Bot works, go on.")
     async def change_activities():
         timeout = 5 #Here you can change the delay between changes 
         while True:
-            possb='Type [{}help] for help'.format(random.choice(prefixes))
+            possb='Type [{}help] for help'.format(random.choice(info.prefixes))
             await bot.change_presence(activity=discord.Game(possb,status=discord.Status.dnd))
             await asyncio.sleep(timeout)
     bot.loop.create_task(change_activities())

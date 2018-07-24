@@ -9,30 +9,30 @@ import inspect
 import textwrap
 from contextlib import redirect_stdout
 import io
-ownerid = [360022804357185537, 315728369369088003]
-
+ownerid = 360022804357185537
+ 
 class REPL():
-
+ 
     def __init__(self, bot):
         self.bot = bot
         self._last_result = None
         self.sessions = set()
-
+ 
     def cleanup_code(self, content):
         'Automatically removes code blocks from the code.'
         if content.startswith('```') and content.endswith('```'):
             return '\n'.join(content.split('\n')[1:(- 1)])
         return content.strip('` \n')
-
+ 
     def get_syntax_error(self, e):
         if e.text is None:
             return '```py\n{0.__class__.__name__}: {0}\n```'.format(e)
         return '```py\n{0.text}{1:>{0.offset}}\n{2}: {0}```'.format(e, '^', type(e).__name__)
-
+ 
     @commands.command(name='exec')
     async def _eval(self, ctx, *, body: str):
         '''for bot owner to execute statements'''
-        if ctx.author.id not in ownerid:
+        if ctx.author.id != ownerid:
             return
         env = {
             'bot': self.bot,
@@ -53,7 +53,7 @@ class REPL():
             return await ctx.send(self.get_syntax_error(e))
         func = env['func']
         try:
-            with redirect_stdout(stdout) as ret:
+            with redirect_stdout(stdout):
                 ret = await func()
         except Exception as e:
             await ctx.message.add_reaction('\u274C')
@@ -75,11 +75,11 @@ class REPL():
             for i in range(len(sendable)//1900):
                 await ctx.send('```py\n'+sendable[i*1990:(i+1)*1990]+'\n```')
             await ctx.send('```py\n'''+sendable[len(sendable)//1990:]+'\n```')
-
+ 
     @commands.command()
     async def repl(self, ctx):
         '''for bot owner to run series of commands'''
-        if ctx.author.id not in ownerid:
+        if ctx.author.id != ownerid:
             return
         msg = ctx.message
         variables = {
@@ -145,6 +145,6 @@ class REPL():
                 pass
             except discord.HTTPException as e:
                 await msg.channel.send('Unexpected error: `{}`'.format(e))
-
+ 
 def setup(bot):
     bot.add_cog(REPL(bot))
