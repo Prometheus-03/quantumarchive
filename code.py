@@ -780,7 +780,7 @@ class Media:
                 sourcelang=info.languages[f.src]+"({})".format(f.src)
                 destlang=info.languages[f.dest]+"({})".format(f.dest)
                 embed=discord.Embed(title="Translation output",colour=discord.Colour.from_rgb(79,255,176))
-                embed.add_field(name="Input [ {} ]:".format(sourcelang),value=f.origin)
+                embed.add_field(name="Input [ {} ]:".format(sourcelang),value=f.origin,inline=False)
                 embed.add_field(name="Result [ {} ]:".format(destlang),value=f.text)
                 embed.set_footer(text="Using the google translate API",icon_url=bot.user.avatar_url)
             await ctx.send(embed=embed)
