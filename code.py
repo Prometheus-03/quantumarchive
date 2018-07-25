@@ -2,6 +2,7 @@ import asyncio,discord,math,random,time,datetime,aiohttp,functools,inspect,re,io
 from discord.ext import commands
 import urllib.request
 import urllib.parse
+from googletrans import Translator
 blacklisted=[]
 #my own utilities
 def tdm(td):
@@ -39,6 +40,19 @@ class Information:
     self.dict_app_id = 'ebbdd492'
     self.prefixes=('q!', 'q>', 'q<', 'q+', 'q-', 'q*', 'q/', 'q?', 'q.', 'q,', 'q:', 'q;','Q!', 'Q>', 'Q<', 'Q+', 'Q-', 'Q*', 'Q/', 'Q?', 'Q.', 'Q,', 'Q:', 'Q;', 'quantum ', 'quantuM ', 'quantUm ', 'quantUM ', 'quanTum ', 'quanTuM ', 'quanTUm ', 'quanTUM ', 'quaNtum ', 'quaNtuM ', 'quaNtUm ', 'quaNtUM ', 'quaNTum ', 'quaNTuM ', 'quaNTUm ', 'quaNTUM ', 'quAntum ', 'quAntuM ', 'quAntUm ', 'quAntUM ', 'quAnTum ', 'quAnTuM ', 'quAnTUm ', 'quAnTUM ', 'quANtum ', 'quANtuM ', 'quANtUm ', 'quANtUM ', 'quANTum ', 'quANTuM ', 'quANTUm ', 'quANTUM ', 'qUantum ', 'qUantuM ', 'qUantUm ', 'qUantUM ', 'qUanTum ', 'qUanTuM ', 'qUanTUm ', 'qUanTUM ', 'qUaNtum ', 'qUaNtuM ', 'qUaNtUm ', 'qUaNtUM ', 'qUaNTum ', 'qUaNTuM ', 'qUaNTUm ', 'qUaNTUM ', 'qUAntum ', 'qUAntuM ', 'qUAntUm ', 'qUAntUM ', 'qUAnTum ', 'qUAnTuM ', 'qUAnTUm ', 'qUAnTUM ', 'qUANtum ', 'qUANtuM ', 'qUANtUm ', 'qUANtUM ', 'qUANTum ', 'qUANTuM ', 'qUANTUm ', 'qUANTUM ', 'Quantum ', 'QuantuM ', 'QuantUm ', 'QuantUM ', 'QuanTum ', 'QuanTuM ', 'QuanTUm ', 'QuanTUM ', 'QuaNtum ', 'QuaNtuM ', 'QuaNtUm ', 'QuaNtUM ', 'QuaNTum ', 'QuaNTuM ', 'QuaNTUm ', 'QuaNTUM ', 'QuAntum ', 'QuAntuM ', 'QuAntUm ', 'QuAntUM ', 'QuAnTum ', 'QuAnTuM ', 'QuAnTUm ', 'QuAnTUM ', 'QuANtum ', 'QuANtuM ', 'QuANtUm ', 'QuANtUM ', 'QuANTum ', 'QuANTuM ', 'QuANTUm ', 'QuANTUM ', 'QUantum ', 'QUantuM ', 'QUantUm ', 'QUantUM ', 'QUanTum ', 'QUanTuM ', 'QUanTUm ', 'QUanTUM ', 'QUaNtum ', 'QUaNtuM ', 'QUaNtUm ', 'QUaNtUM ', 'QUaNTum ', 'QUaNTuM ', 'QUaNTUm ', 'QUaNTUM ', 'QUAntum ', 'QUAntuM ', 'QUAntUm ', 'QUAntUM ', 'QUAnTum ', 'QUAnTuM ', 'QUAnTUm ', 'QUAnTUM ', 'QUANtum ', 'QUANtuM ', 'QUANtUm ', 'QUANtUM ', 'QUANTum ', 'QUANTuM ', 'QUANTUm ', 'QUANTUM ')
     self.dict_app_key = 'b9942f0306456037953c7481b7f036ca'
+    self.languages= {'af': 'afrikaans','sq': 'albanian','am': 'amharic','ar': 'arabic','hy': 'armenian','az': 'azerbaijani','eu': 'basque','be': 'belarusian',
+    'bn': 'bengali','bs': 'bosnian','bg': 'bulgarian','ca': 'catalan','ceb': 'cebuano','ny': 'chichewa','zh-cn': 'chinese (simplified)',
+    'zh-tw': 'chinese (traditional)','co': 'corsican','hr': 'croatian','cs': 'czech','da': 'danish','nl': 'dutch','en': 'english','eo': 'esperanto',
+    'et': 'estonian','tl': 'filipino','fi': 'finnish','fr': 'french','fy': 'frisian','gl': 'galician','ka': 'georgian','de': 'german','el': 'greek',
+    'gu': 'gujarati','ht': 'haitian creole','ha': 'hausa','haw': 'hawaiian','iw': 'hebrew','hi': 'hindi','hmn': 'hmong','hu': 'hungarian','is': 'icelandic',
+    'ig': 'igbo','id': 'indonesian','ga': 'irish','it': 'italian','ja': 'japanese','jw': 'javanese','kn': 'kannada','kk': 'kazakh','km': 'khmer',
+    'ko': 'korean','ku': 'kurdish (kurmanji)','ky': 'kyrgyz','lo': 'lao','la': 'latin','lv': 'latvian','lt': 'lithuanian','lb': 'luxembourgish',
+    'mk': 'macedonian','mg': 'malagasy','ms': 'malay','ml': 'malayalam','mt': 'maltese','mi': 'maori','mr': 'marathi','mn': 'mongolian','my': 'myanmar (burmese)',
+    'ne': 'nepali','no': 'norwegian','ps': 'pashto','fa': 'persian','pl': 'polish','pt': 'portuguese','pa': 'punjabi','ro': 'romanian','ru': 'russian',
+    'sm': 'samoan','gd': 'scots gaelic','sr': 'serbian','st': 'sesotho','sn': 'shona','sd': 'sindhi','si': 'sinhala','sk': 'slovak','sl': 'slovenian',
+    'so': 'somali','es': 'spanish','su': 'sundanese','sw': 'swahili','sv': 'swedish','tg': 'tajik','ta': 'tamil','te': 'telugu','th': 'thai','tr': 'turkish',
+    'uk': 'ukrainian','ur': 'urdu','uz': 'uzbek','vi': 'vietnamese','cy': 'welsh','xh': 'xhosa','yi': 'yiddish','yo': 'yoruba','zu': 'zulu','fil': 'Filipino',
+    'he': 'Hebrew'}
 
 info=Information()
 bot = commands.Bot(description='Tune in to lots of fun with this bot!', command_prefix=commands.when_mentioned_or(*info.prefixes))
@@ -204,7 +218,7 @@ class Information:
     @commands.command()
     async def invite(self, ctx):
         '''link to invite my bot elsewhere'''
-        await ctx.send(embed=discord.Embed(title="Bot invite+Official server",description="This is my bot invite:\nhttps://discordapp.com/oauth2/authorize?client_id=384623978028859392&scope=bot&permissions=2146958591\nPlease consider joining this server too:https://discord.gg/ngaC2Bh",color=eval(hex(ctx.author.color.value))))
+        await ctx.send(embed=discord.Embed(title="Some bot related links",description="This is my bot invite:\nhttps://discordapp.com/api/oauth2/authorize?client_id=384623978028859392&permissions=335932630&scope=bot\nPlease consider joining this server too:https://discord.gg/ngaC2Bh\nCheck out Quantum Bot's official site:http://quantum-bot.me",color=eval(hex(ctx.author.color.value))))
  
     @commands.command()
     async def getpeople(self,ctx,*,rolename=None):
@@ -702,7 +716,7 @@ class Media:
                 for j in i["lexicalEntries"]:
                     for k in j["entries"]:
                         for v in k["senses"]:
-                            deff=(v["definitions"][0])
+                            deff=v["definitions"][0]
                             examples=[]
                             try:
                                 for f in v["examples"]:
@@ -713,7 +727,7 @@ class Media:
             embed=discord.Embed(title="Definitions for the word %s"%word,colour=discord.Colour.blue())
             desc_text=[]
             for key in definitions:
-                temp="{}. {}".format(len(desc_text)+1,key)
+                temp="***{}. {}***".format(len(desc_text)+1,key)
                 exam=definitions[key]
                 desc_text+=[temp+"\n**Examples:**\n"+exam]
             embed.description="\n".join(desc_text)
@@ -740,6 +754,38 @@ class Media:
                 embed.set_image(url=send)
             await ctx.send(embed=embed)
         except:await ctx.send("An error occurred. Please try again.",delete_after=3)
+
+    @commands.cooldown(rate=1,per=8,type=commands.BucketType.guild)
+    @commands.command(aliases=["trans"])
+    async def translate(self,ctx,*,message="Hello"):
+        '''Uses google translate to translate given message
+    Usage:
+    q!translate <message=Hello> --> interactive translation query'''
+        try:
+            m=await ctx.send(ctx.author.mention+", please choose your source language. Can be its name or its code. Anything not detected defaults to auto.")
+            src=await bot.wait_for('message',check=lambda x:x.author==ctx.author,timeout=60)
+            await m.delete()
+            m=await ctx.send(ctx.author.mention+", please choose your destination language. Can be its name or its code. Anything not detected defaults to en,English.")
+            dest=await bot.wait_for('message',check=lambda x:x.author==ctx.author,timeout=60)
+            await m.delete()
+            src=src.content
+            dest=dest.content
+            if src not in list(info.languages.keys())+list(info.languages.values()):
+                src="auto"
+            if dest not in list(info.languages.keys())+list(info.languages.values()):
+                dest="en"
+            async with ctx.typing():
+                translator=Translator()
+                f=translator.translate(message,dest=dest,src=src)
+                sourcelang=info.languages[f.src]+"({})".format(f.src)
+                destlang=info.languages[f.dest]+"({})".format(f.dest)
+                embed=discord.Embed(title="Translation output",colour=discord.Colour.from_rgb(79,255,176))
+                embed.add_field(name="Input [ {} ]:".format(sourcelang),value=f.origin)
+                embed.add_field(name="Result [ {} ]:".format(destlang),value=f.text)
+                embed.set_footer(text="Using the google translate API",icon_url=bot.user.avatar_url)
+            await ctx.send(embed=embed)
+        except asyncio.TimeoutError:
+            await ctx.send(embed=discord.Embed(title="Error",description="You haven't filled up necessary data! Try again!",colour=discord.Colour.red()))
 
 # everything from here onwards are bot events
 
