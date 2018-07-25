@@ -678,24 +678,51 @@ class Media:
         '''search Oxford Dictionaries to get the definition you need
     Usage:
     q!dictionary [word] --> definitions of the word'''
-        
         language = 'en'
         word_id = word
         url = 'https://od-api.oxforddictionaries.com:443/api/v1/entries/' + language     + '/' + word_id.lower()
         r = __import__("requests").get(url, headers = {'app_id': info.dict_app_id, 'app_key': info.dict_app_key})
-        #__import__("pprint").pprint(r.json())
-        definitions=[]
-        for i in r.json()["results"]:
-            for j in i["lexicalEntries"]:
-                for k in j["entries"]:
-                    for v in k["senses"]:
-                        definitions.append(v["definitions"][0])
-        embed=discord.Embed(title="Definitions for the word %s"%word,colour=discord.Colour.blue())
-        desc_text="\n".join([str(a+1)+". "+b for (a,b) in enumerate(definitions)])
-        embed.description=desc_text
-        embed.set_footer(text="Using **Oxford Dictionaries** API")
-        await ctx.send(embed=embed)
-        print("code {}\n".format(r.status_code))
+        definitions={}
+        status_code = {
+        200: 'Success!',
+        400: 'The request was invalid or cannot be otherwise served.',
+        403: 'The request failed due to invalid credentials.',
+        404: 'No entry is found.',
+        500: 'Something is broken. Please contact the Oxford Dictionaries '
+             'API team to investigate.',
+        502: 'Oxford Dictionaries API is down or being upgraded.',
+        503: 'The Oxford Dictionaries API servers are up, but overloaded '
+             'with requests. Please try again later.',
+        504: 'The Oxford Dictionaries API servers are up, but the request '
+             'couldn’t be serviced due to some failure within our stack. '
+             'Please try again later.'
+        }
+        if r.status_code==200:
+            for i in r.json()["results"]:
+                for j in i["lexicalEntries"]:
+                    for k in j["entries"]:
+                        for v in k["senses"]:
+                            deff=(v["definitions"][0])
+                            examples=[]
+                            try:
+                                for f in v["examples"]:
+                                    examples+=["- "+"".join(f["text"])]
+                                definitions[deff]="\n".join(examples)
+                            except KeyError:
+                                definitions[deff]="(no examples)"
+            embed=discord.Embed(title="Definitions for the word %s"%word,colour=discord.Colour.blue())
+            desc_text=[]
+            for key in definitions:
+                temp="{}. {}".format(len(desc_text)+1,key)
+                exam=definitions[key]
+                desc_text+=[temp+"\n**Examples:**\n"+exam]
+            embed.description="\n".join(desc_text)
+            embed.set_footer(text="Using **Oxford Dictionaries** API")
+            await ctx.send(embed=embed)
+        else:
+            embed=discord.Embed(title="An error occurred while processing your request!",colour=discord.Colour.red())
+            embed.add_field(name="Error Code {}".format(r.status_code),value=status_code[r.status_code])
+            await ctx.send(embed=embed)
 
     @commands.command()
     async def qrcode(self,ctx,*,message="Please provide an argument"):
@@ -754,10 +781,13 @@ async def on_reaction_add(reaction,user):
 
 @bot.event
 async def on_command_error(ctx,error):
-    embed=discord.Embed(title=str(type(error))[8:-2],description=str(error),colour=discord.Colour.from_rgb(random.randint(0,255),random.randint(0,255),random.randint(0,255)))
-    await ctx.send("***Roses are red, violets are blue, there is an error when the command is used by you***",embed=embed,delete_after=15)
-    for i in (traceback.format_exception(None, error, error.__traceback__)):
-        print(i,end="")
+    if type(error)==discord.ext.commands.errors.CommandOnCooldown:
+        await ctx.send(embed=discord.Embed(title="Woah woah slow down!",description=error.args[0],colour=discord.Colour.red()))
+    else:
+        embed=discord.Embed(title=str(type(error))[8:-2],description=str(error),colour=discord.Colour.from_rgb(random.randint(0,255),random.randint(0,255),random.randint(0,255)))
+        await ctx.send("***Roses are red, violets are blue, there is an error when the command is used by you***",embed=embed,delete_after=15)
+        for i in (traceback.format_exception(None, error, error.__traceback__)):
+            print(i,end="")
 
 @bot.event
 async def on_guild_join(guild):
@@ -795,7 +825,7 @@ async def on_ready():
     bot.add_cog(Media())
     await bot.change_presence(activity=discord.Game(name='Type [q?help] for help', type=2),status=discord.Status.dnd)
     f=bot.get_guild(413290013254615041).get_channel(436548366088798219)
-    if __file__=="/app/code2.py":
+    if __file__=="/app/code.py":
         await f.send(embed=discord.Embed(title="Bot Updated on:",description=f"{datetime.datetime.utcnow(): %B %d, %Y at %H:%M:%S GMT}",colour=discord.Colour.dark_gold()))
     else:
         await f.send(embed=discord.Embed(title="Beta Bot Update tested on:",description=f"{datetime.datetime.utcnow(): %B %d, %Y at %H:%M:%S GMT}",colour=discord.Colour.blue()))
