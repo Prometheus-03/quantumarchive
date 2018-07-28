@@ -787,6 +787,39 @@ class Media:
         except asyncio.TimeoutError:
             await ctx.send(embed=discord.Embed(title="Error",description="You haven't filled up necessary data! Try again!",colour=discord.Colour.red()))
 
+class Images:
+    @commands.command()
+    async def hug(self,ctx,member:discord.Member=None):
+        '''Need a hug? Quantum Bot to the rescue!
+    Usage:
+    q!hug --> get a hug from Quantum Bot
+    q!hug [member] --> hugs another user
+    q!hug @Quantum Bot --> I'll accept it :)'''
+        embed=discord.Embed(colour=discord.Colour.from_rgb(245,245,14))
+        embed.set_footer(text="Credits to Google Image Search Results",icon_url="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/1000px-Google_%22G%22_Logo.svg.png")
+        with open("Images/hugs.txt") as hugs:
+            image=random.choice(hugs.readlines())
+        embed.set_image(url=image)
+        if member==None:
+            embed.title="Hey {}, here yougo, a hug!".format(ctx.author)
+        elif member==bot.user:
+            embed.title="Thank you {} for the hug! I appreaciate your love! :)".format(ctx.author)
+        else:
+            embed.title="Hey {}, {} has hugged you!".format(member,ctx.author)
+        await ctx.send(embed=embed)
+
+    @commands.command(aliases=["cat","kitten","kitty"])
+    async def cats(self, ctx):
+        '''Who doesn't love images of these furries?
+    Usage:
+    q![cats|cat|kitten|kitty] --> returns a cat image'''
+        embed=discord.Embed(title="{}, here's your cute furball".format(ctx.author),colour=discord.Colour.teal())
+        embed.set_footer(text="Credits to Google Image Search Results",icon_url="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/1000px-Google_%22G%22_Logo.svg.png")
+        embed.description=random.choice(["Awww, how cute!","These cuties melt my heart!","So adorable!","Meowr!","Kittens for life!","Purrr!"])
+        with open("Images/cats.txt") as cats:
+            embed.set_image(url=random.choice(cats.readlines()))
+        await ctx.send(embed=embed)
+
 # everything from here onwards are bot events
 
 @bot.event
@@ -869,12 +902,13 @@ async def on_ready():
     bot.add_cog(Feedback())
     bot.add_cog(Fun())
     bot.add_cog(Media())
+    bot.add_cog(Images())
     await bot.change_presence(activity=discord.Game(name='Type [q?help] for help', type=2),status=discord.Status.dnd)
     f=bot.get_guild(413290013254615041).get_channel(436548366088798219)
-    if __file__=="/app/code.py":
-        await f.send(embed=discord.Embed(title="Bot Updated on:",description=f"{datetime.datetime.utcnow(): %B %d, %Y at %H:%M:%S GMT}",colour=discord.Colour.dark_gold()))
-    else:
+    if __file__ == r"C:\Users\vengat\Desktop\Bot\Quantum Bot\code.py":
         await f.send(embed=discord.Embed(title="Beta Bot Update tested on:",description=f"{datetime.datetime.utcnow(): %B %d, %Y at %H:%M:%S GMT}",colour=discord.Colour.blue()))
+    else:
+        await f.send(embed=discord.Embed(title="Bot Updated on:",description=f"{datetime.datetime.utcnow(): %B %d, %Y at %H:%M:%S GMT}",colour=discord.Colour.dark_gold()))
     print("Bot works, go on.")
     async def change_activities():
         timeout = 5 #Here you can change the delay between changes 
