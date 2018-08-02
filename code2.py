@@ -12,7 +12,7 @@ import io
 ownerid = 360022804357185537
  
 class REPL():
- 
+    '''custom command execution commands'''
     def __init__(self, bot):
         self.bot = bot
         self._last_result = None

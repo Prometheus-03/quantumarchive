@@ -1,8 +1,27 @@
-import asyncio,discord,math,random,time,datetime,aiohttp,functools,inspect,re,io,contextlib,traceback,sys
+#!/usr/bin/env python3.7
+# -*- coding: utf-8 -*-
 from discord.ext import commands
 import urllib.request
 import urllib.parse
+import discord
+import math
+import random
+import time
+import datetime
+import aiohttp
+import functools
+import inspect
+import re
+import io
+import contextlib
+import traceback
+import sys
+import subprocess
+import asyncio
 from googletrans import Translator
+
+from paginator import HelpPaginator
+
 blacklisted=[]
 #my own utilities
 def tdm(td):
@@ -60,31 +79,25 @@ bot = commands.Bot(description='Tune in to lots of fun with this bot!', command_
 class Math:
     '''for mathematical fun'''
     @commands.command()
-    async def add(self, ctx,*,nums):
-        '''returns sum of numbers separated with spaces
-    Usage:
-    q!add [numbers separated by spaces]'''
+    async def add(self, ctx,*,numbers):
+        '''returns sum of numbers separated with spaces'''
         try:
-            await ctx.send(str(sum([int(i) for i in nums.split()])))
+            await ctx.send(str(sum([int(i) for i in numbers.split()])))
         except:
             await ctx.send("You didn't give the correct arguments.")
  
     @commands.command()
-    async def mul(self, ctx,*,nums):
-        '''returns product of arguments separated with spaces
-    Usage:
-    q!mul [numbers separated by spaces]'''
+    async def mul(self, ctx,*,numbers):
+        '''returns product of arguments separated with spaces'''
         try:
             m=lambda x,y:x*y
-            await ctx.send(str(functools.reduce(m,[int(i) for i in nums.split()])))
+            await ctx.send(str(functools.reduce(m,[int(i) for i in numberss.split()])))
         except:
             await ctx.send("You didn't give the correct arguments.")
  
     @commands.command()
     async def factorial(self,ctx,num:int):
-            '''returns the factorial of the given input
-    Usage:
-    q!factorial [number]'''
+            '''returns the factorial of the given input'''
             try:
                     await ctx.send(embed=discord.Embed(title="%d! is equal to..."%num,description=str(math.factorial(num))))
             except Exception as p:
@@ -92,9 +105,7 @@ class Math:
 
     @commands.command()
     async def collatz(self,ctx,num:int):
-        '''dedicated to the famous conjecture, will return the steps from input to 1
-    Usage:
-    q!collatz [seed]'''
+        '''dedicated to the famous conjecture, will return the steps from input to 1'''
         nums=[num]
         last=num
         while last>1:
@@ -109,9 +120,7 @@ class Admin:
     '''for administrative purposes'''
     @commands.command()
     async def kick(self, ctx, member: discord.Member):
-        '''Kick members from your server
-    Usage:
-    q!kick [member]'''
+        '''Kick members from your server'''
         try:
                 await member.kick()
                 await ctx.message.add_reaction('\u2705')
@@ -119,9 +128,7 @@ class Admin:
                 await ctx.message.add_reaction('\u274C')
     @commands.command()
     async def ban(self, ctx, member: discord.Member):
-        '''Ban toxic members from your server
-    Usage:
-    q!ban [member]'''
+        '''Ban toxic members from your server'''
         try:
                 await member.ban()
                 await ctx.message.add_reaction('\u2705')
@@ -130,9 +137,7 @@ class Admin:
  
     @commands.command(aliases=['ar','updaterole'])
     async def changerole(self,ctx,member:discord.Member,role:discord.Role):
-        '''to add/remove a role from a person
-    Usage:
-    q!changerole [member] [role]'''
+        '''to add/remove a role from a person'''
         try:
             if role not in member.roles:await ctx.author.add_roles(role)
             else:await ctx.author.remove_roles(role)
@@ -144,9 +149,7 @@ class General:
     '''commands available for everyone'''           
     @commands.command(pass_context=True)
     async def ping(self, ctx):
-        '''Call the bot
-    Usage:
-    q!ping'''
+        '''Call the bot'''
         msg = await ctx.send('Pong!')
         res = msg.created_at - ctx.message.created_at
         res = tdm(res)
@@ -154,18 +157,14 @@ class General:
         await msg.edit(content='Pong! :ping_pong:\nBot response time: {}ms\nDiscord latency: {}ms'.format(res,round(lat,1)))
  
     @commands.command()
-    async def say(self, ctx, *, something='Quantum Bot here!!'):
-        '''The bot becomes your copycat
-    Usage:
-    q!say <text>'''
-        await ctx.send(something)
+    async def say(self, ctx, *, text='Quantum Bot here!!'):
+        '''The bot becomes your copycat='''
+        await ctx.send(text)
         await ctx.message.delete()
  
     @commands.command()
     async def now(self, ctx):
-        '''Get current date and time
-    Usage:
-    q!now'''
+        '''Get current date and time'''
         m = str(datetime.datetime.now()).split()
         embed=discord.Embed(title="Date-time information",color=eval(hex(ctx.author.color.value)))
         embed.add_field(name="Date",value="{}".format(m[0]))
@@ -176,9 +175,7 @@ class Feedback:
     '''feedback related commands'''
     @commands.command(aliases=['fb'])
     async def feedback(self,ctx,*,message):
-        '''My bot is not very good, feedback is appreciated!
-    Usage:
-    q!feedback [text]'''
+        '''My bot is not very good, feedback is appreciated!'''
         author=ctx.message.author.name+" said in "+"'"+ctx.guild.name+"'"
         await bot.get_guild(413290013254615041).get_channel(413631317272690688).send(embed=discord.Embed(color=eval(hex(ctx.author.color.value)),title=author,description="#"+ctx.channel.name+":\n"+message))
         await ctx.message.add_reaction('\u2705')
@@ -288,86 +285,27 @@ Server Region:{}\nMember count:{}\nOwner:{}\nCreated On:{}\nNumber of text chann
         await ctx.send(permlist[perm]*"\u2705"+(1-permlist[perm])*"\u274C")
         return permlist[perm]
 
-    @commands.command(aliases=["h"])
-    @commands.guild_only()
-    async def help(self,ctx,command=None):
-      '''bot help message
-    Usage:
-    q!help --> general help message
-    q!help [command] --> specific help message
-      '''
-      if command in [i.name for i in bot.commands]:
-        f=inspect.getsource(bot.get_command(command).callback)
-        m=list(find("'''",f))
-        embed=discord.Embed(title="Help for '"+command+"' command",description=f[m[0]+3:m[1]],colour=ctx.author.color)
-        embed.set_thumbnail(url=bot.user.avatar_url)
-        await ctx.send(embed=embed)
-      else:
-        command_list={}
-        message={}
-        embeds=[]
-        for i in bot.cogs.keys():
-                if i not in ["REPL","Database"]:command_list.update({i:list(m for m in dir(bot.get_cog(i))[26:])})
-                elif i=="REPL":command_list.update({'REPL':['exec','repl']})
-                elif i=="Database":command_list.update({'Database':['bump', 'dailies']})
-        for i in bot.commands:
-                f=inspect.getsource(bot.get_command(str(i)).callback)
-                m=list(find("'''",f))
-                message.update({str(i):f[m[0]+3:m[1]]})
-        em=discord.Embed(title="Quantum Bot Help Message",color=eval(hex(ctx.author.color.value)))
-        for i in command_list.keys():
-                embed=discord.Embed(title=i+" help",inline=False,colour=ctx.author.colour)
-                for m in command_list[i]:
-                        embed.add_field(name=m,value=message[m],inline=False)
-                embeds.append(embed)
-        #till now we got the embeds, now for paginator
-        info_embed=discord.Embed(title="Quantum Bot help message",description="""Please press:
-        \u23EA to view the very first help message.
-        \u25C0 to scroll backward
-        \u23F9 to stop looking through the commands
-        \u25B6 to scroll forward
-        \u23E9 to view the very last help message
-        \U0001f522 to search by page 
-        \u2139 to view this help message""",colour=ctx.author.colour)
-        curr=0
-        reactions=['\u23EA','\u25C0','\u23F9','\u25B6','\u23E9','\U0001f522','\u2139']
-        mess=await ctx.send(embed=info_embed)
-        cogc=len(list(bot.cogs.keys()))-1
-        for i in reactions:
-            await mess.add_reaction(i)
-            await asyncio.sleep(1)
-        while True:
-            try:
-                waiting=await bot.wait_for('reaction_add',check=lambda reaction,user:(user.id==ctx.author.id) and (reaction.emoji in reactions),timeout=60)
-                if waiting[0].emoji=="\u23EA":
-                        curr=0
-                        await mess.edit(embed=embeds[0])
-                elif waiting[0].emoji=="\u25C0":
-                        if curr==0:curr=cogc
-                        else:curr-=1
-                        await mess.edit(embed=embeds[curr])
-                elif waiting[0].emoji=="\u23F9":
-                        break
-                elif waiting[0].emoji=="\u25B6":
-                        if curr==cogc:curr=0
-                        else:curr+=1
-                        await mess.edit(embed=embeds[curr])
-                elif waiting[0].emoji=="\u23E9":
-                        curr=cogc
-                        await mess.edit(embed=embeds[cogc])
-                elif waiting[0].emoji=="\U0001f522":
-                        await ctx.send("Select your page number (from 1 to %d)"%(cogc+1))
-                        num=await bot.wait_for('message',check=lambda message:(message.content in [str(i+1) for i in range(cogc+1)]) and (message.author.id==ctx.author.id),timeout=60)
-                        curr=int(num.content)-1
-                        await mess.edit(embed=embeds[curr])
-                elif waiting[0].emoji=="\u2139":
-                        await mess.edit(embed=info_embed)
-                await mess.remove_reaction(waiting[0].emoji,ctx.author)
-            except asyncio.TimeoutError:
-                break
-        await mess.edit(embed=discord.Embed(title="You have just used Quantum Bot's help message",description="Thank you!",colour=ctx.author.colour))
-        await mess.clear_reactions()
-                 
+    @commands.command(name='help')
+    async def _help(self, ctx, *, command: str = None):
+        """Shows help about a command or the bot"""
+        try:
+            if command is None:
+                p = await HelpPaginator.from_bot(ctx)
+            else:
+                entity = bot.get_cog(command) or bot.get_command(command)
+
+                if entity is None:
+                    clean = command.replace('@', '@\u200b')
+                    return await ctx.send(f'Command or category "{clean}" not found.')
+                elif isinstance(entity, commands.Command):
+                    p = await HelpPaginator.from_command(ctx, entity)
+                else:
+                    p = await HelpPaginator.from_cog(ctx, entity)
+
+            await p.paginate()
+        except Exception as e:
+            await ctx.send(traceback.format_exception(None, e, e.__traceback__))
+
 class Fun:
     '''have fun with these commands'''
     @commands.command()
@@ -381,19 +319,13 @@ class Fun:
 
     @commands.command()
     async def think(self,ctx):
-        '''let the bot think for a while
-    Usage:
-    q!think'''
+        '''let the bot think for a while'''
         await ctx.message.delete()
         await ctx.send(discord.utils.get(bot.emojis,name='fidgetthink'))
 
     @commands.command()
     async def morse(self,ctx,*,message):
-        '''Converts your ENGLISH message to morse. And vice versa.
-    Add an e to say it's English and m to say it's morse.
-    Usage:
-    q!morse e|THONK
-    q!morse m|-----/.-/.-'''
+        '''Converts your ENGLISH message to morse. And vice versa.\nAdd an e to say it's English and m to say it's morse.'''
 
         CODE = {'A': '.-',     'B': '-...',   'C': '-.-.', 
         'D': '-..',    'E': '.',      'F': '..-.',
@@ -534,11 +466,10 @@ class Owner:
                     await ctx.guild.get_member(member.id).send(embed=discord.Embed(title="Warning!",description="**My bot owner warned your because**:{}".format(reason),colour=discord.Colour(0xFFFF00)))
                 await ctx.message.add_reaction('\u2705')
 class Pystuff():
+    '''commands that relate to Python coding'''
     @commands.command()
     async def pydir(self,ctx,*,command=None):
-            '''list of methods of a given object
-    Usage:
-    q!pydir [object]'''
+            '''list of methods of a given object'''
             if ctx.message.author.id!=info.owner_id:
                 await ctx.send(embed=discord.Embed(title="Error message",color=eval(hex(ctx.author.color.value)),description="Not allowed!"))
             else:                
@@ -559,9 +490,7 @@ class Pystuff():
      
     @commands.command()
     async def pyhelp(self,ctx,*,command=None):
-            '''the Python help message for a given object
-    Usage:
-    q!pyhelp [object]'''
+            '''the Python help message for a given object'''
             if ctx.message.author.id!=info.owner_id:
                 await ctx.send(embed=discord.Embed(title="Error message",color=eval(hex(ctx.author.color.value)),description="Not allowed!"))
             else:
@@ -582,8 +511,51 @@ class Pystuff():
                             await ctx.send(embed=i)
                     except NameError:
                         await ctx.send(embed=discord.Embed(title="Error raised!",description="Object %s is not found!"%command))
-                        
+
+    @commands.command()
+    async def pypi(self, ctx, search):
+        '''searches information about the PyPI for the module you want'''
+        base="https://pypi.org/pypi/{}/json".format(urllib.request.pathname2url(search))
+        try:
+            f = await getjson(base)
+            author=f['info']['author']
+            email =f['info']['author_email']
+            homepage=f['info']['home_page']
+            project= f['info']['project_url']
+            required_version=f['info']['requires_python']
+            module_version=f['info']['version']
+            embed=discord.Embed(title="Details about the PyPI module {}".format(search),colour=discord.Colour.dark_gold())
+            embed.add_field(name="Author",value=author)
+            embed.add_field(name="Author's Email",value=email)
+            embed.add_field(name="Module's Homepage",value=f"[Homepage]({homepage})")
+            embed.add_field(name="Project Url",value="[{}, version {}]({})".format(search,module_version,project))
+            embed.add_field(name="Minimum Python version required",value=required_version[2:])
+            await ctx.send(embed=embed)
+        except aiohttp.client_exceptions.ContentTypeError:
+            await ctx.send(embed=discord.Embed(title="Module Cannot Be Found!",description=f"The module with the name **{search}** does not exist.",colour=discord.Colour.red()))
+        except discord.errors.HTTPException:
+            await ctx.send(embed=discord.Embed(title="Module Information Cannot Be Obtained",description=f"The module with the name **{search}** does not have a complete description, if one even exists.",colour=discord.Colour.red()))
+
+    @commands.command()
+    async def pypisearch(self, ctx, module):
+        '''gets a list of PyPI modules with roughly similar names'''
+        async with aiohttp.ClientSession() as session:
+                async with session.get("https://pypi.org/search/?q=asyncpg") as response:
+                        f = await response.text()
+        indicess=list(find('<h3 class="package-snippet__title">',f))
+        indicese=list(find('</h3>',f))
+        modules=[]
+        for i in range(len(indicess)):
+            e=(f[indicess[i]:indicese[i]])
+            namestart=list(find('<span class="package-snippet__name">',e))[0]+36
+            verstart=list(find('<span class="package-snippet__version">',e))[0]+39
+            spans=list(find('</span>',e))
+            modules.append(f"{e[namestart:spans[0]]}: v{e[verstart:spans[1]]}")
+        send=discord.Embed(title=f"PyPI search results for {module}",colour=ctx.author.colour,description="```"+"\n".join(modules)+"```")
+        await ctx.send(embed=send)
+
 class Media:
+    '''commands that help you get various media'''
     @commands.command(passcontext=True)
     async def youtube(self, ctx, *, youtube):
         '''Searches youtube videos with inputted queries'''
@@ -603,25 +575,20 @@ class Media:
                 await ctx.send(embed=embed)
                 
     @commands.command()
-    async def google(self, ctx, *, anything):
-            '''Search Google for something
-    Usage:
-    q!google [query]'''
+    async def google(self, ctx, *, query):
+            '''Search Google for something'''
             content=[]
             async with ctx.typing():
-                m=await getjson("http://api.tanvis.xyz/search/"+urllib.request.pathname2url(anything))
+                m=await getjson("http://api.tanvis.xyz/search/"+urllib.request.pathname2url(query))
             for i in m:
                 content.append(i['link'])
-            embed=discord.Embed(title="'%s' search results:"%anything,description="\n".join(content),colour=discord.Colour.from_rgb(66, 133, 244))
+            embed=discord.Embed(title="'%s' search results:"%query,description="\n".join(content),colour=discord.Colour.from_rgb(66, 133, 244))
             embed.set_footer(text="using tanvis.xyz API")
             await ctx.send(embed=embed)
 
     @commands.command(aliases=['wiki'])
     async def wikipedia(self, ctx, *, anything):
-            '''look through wikipedia for what you want,
-    Usage:
-    q!wikipedia [query]
-    q!wiki [query]'''
+            '''look through wikipedia for what you want'''
             wew=urllib.request.pathname2url(anything)
             f=await getjson(f"https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&indexpageids=1&redirects=1&explaintext=1&exsectionformat=plain&titles={wew}")
             query=f['query']
@@ -632,10 +599,7 @@ class Media:
 
     @commands.command()
     async def xkcd(self, ctx, num:int=None):
-        '''read the famous comic strip
-    Usage:
-    q!xkcd ->returns random xkcd comic
-    q!xkcd <number> ->returns the xkcd comic strip with that number'''
+        '''read the famous comic strip, leaving blank gets random comic'''
         try:
             async with ctx.typing():
                 if num is None:num=random.randint(1,1996)
@@ -667,9 +631,7 @@ class Media:
     @commands.cooldown(rate=1,per=8,type=commands.BucketType.guild)
     @commands.command()
     async def weather(self,ctx,*,location):
-        '''to get the weather of a given location
-    Usage:
-    q!weather [location]'''
+        '''to get the weather of a given location'''
         try:
             async with ctx.typing():
                 url="http://api.tanvis.xyz/weather/"+urllib.request.pathname2url(location)
@@ -689,9 +651,7 @@ class Media:
     @commands.cooldown(rate=1,per=8,type=commands.BucketType.guild)
     @commands.command(aliases=['define','def','dict'])
     async def dictionary(self, ctx, word):
-        '''search Oxford Dictionaries to get the definition you need
-    Usage:
-    q!dictionary [word] --> definitions of the word'''
+        '''search Oxford Dictionaries to get the definition you need'''
         language = 'en'
         word_id = word
         url = 'https://od-api.oxforddictionaries.com:443/api/v1/entries/' + language     + '/' + word_id.lower()
@@ -740,10 +700,7 @@ class Media:
 
     @commands.command()
     async def qrcode(self,ctx,*,message="Please provide an argument"):
-        '''Generate a QR Code
-    Usage:
-    Q!qrcode <message="Please provide an argument"> --> Returns a QR Code that gives that message
-    '''
+        '''Generate a QR Code'''
         try:
             async with ctx.typing():
                 url="http://api.qrserver.com/v1/create-qr-code/?"
@@ -758,9 +715,7 @@ class Media:
     @commands.cooldown(rate=1,per=8,type=commands.BucketType.guild)
     @commands.command(aliases=["trans"])
     async def translate(self,ctx,*,message="Hello"):
-        '''Uses google translate to translate given message
-    Usage:
-    q!translate <message=Hello> --> interactive translation query'''
+        '''Uses google translate to translate given message, opens an interactive support'''
         try:
             m=await ctx.send(ctx.author.mention+", please choose your source language. Can be its name or its code. Anything not detected defaults to auto.")
             src=await bot.wait_for('message',check=lambda x:x.author==ctx.author,timeout=60)
@@ -788,13 +743,10 @@ class Media:
             await ctx.send(embed=discord.Embed(title="Error",description="You haven't filled up necessary data! Try again!",colour=discord.Colour.red()))
 
 class Images:
+    '''commands dedicated to sending some image'''
     @commands.command()
     async def hug(self,ctx,member:discord.Member=None):
-        '''Need a hug? Quantum Bot to the rescue!
-    Usage:
-    q!hug --> get a hug from Quantum Bot
-    q!hug [member] --> hugs another user
-    q!hug @Quantum Bot --> I'll accept it :)'''
+        '''Need a hug? Quantum Bot to the rescue!'''
         embed=discord.Embed(colour=discord.Colour.from_rgb(245,245,14))
         embed.set_footer(text="Credits to Google Image Search Results",icon_url="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/1000px-Google_%22G%22_Logo.svg.png")
         with open("Images/hugs.txt") as hugs:
@@ -810,9 +762,7 @@ class Images:
 
     @commands.command(aliases=["cat","kitten","kitty"])
     async def cats(self, ctx):
-        '''Who doesn't love images of these furries?
-    Usage:
-    q![cats|cat|kitten|kitty] --> returns a cat image'''
+        '''Who doesn't love images of these furries? Let's see a picture of them!'''
         embed=discord.Embed(title="{}, here's your cute furball".format(ctx.author),colour=discord.Colour.teal())
         embed.set_footer(text="Credits to Google Image Search Results",icon_url="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/1000px-Google_%22G%22_Logo.svg.png")
         embed.description=random.choice(["Awww, how cute!","These cuties melt my heart!","So adorable!","Meowr!","Kittens for life!","Purrr!"])
