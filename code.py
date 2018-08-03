@@ -515,32 +515,37 @@ class Pystuff():
     @commands.command()
     async def pypi(self, ctx, search):
         '''searches information about the PyPI for the module you want'''
-        base="https://pypi.org/pypi/{}/json".format(urllib.request.pathname2url(search))
+        base = "https://pypi.org/pypi/{}/json".format(urllib.request.pathname2url(search))
         try:
             f = await getjson(base)
-            author=f['info']['author']
-            email =f['info']['author_email']
-            homepage=f['info']['home_page']
-            project= f['info']['project_url']
-            required_version=f['info']['requires_python']
-            module_version=f['info']['version']
-            embed=discord.Embed(title="Details about the PyPI module {}".format(search),colour=discord.Colour.dark_gold())
-            embed.add_field(name="Author",value=author)
-            embed.add_field(name="Author's Email",value=email)
-            embed.add_field(name="Module's Homepage",value=f"[Homepage]({homepage})")
-            embed.add_field(name="Project Url",value="[{}, version {}]({})".format(search,module_version,project))
-            embed.add_field(name="Minimum Python version required",value=required_version[2:])
+            embed = discord.Embed(title="Details about the PyPI module {}".format(search),
+                                  colour=discord.Colour.dark_gold())
+            author = f['info']['author']
+            email = f['info']['author_email']
+            homepage = f['info']['home_page']
+            project = f['info']['project_url']
+            required_version = f['info']['requires_python']
+            module_version = f['info']['version']
+            embed.add_field(name="Author", value=author)
+            embed.add_field(name="Author's Email", value=email)
+            embed.add_field(name="Module's Homepage", value=f"[Homepage]({homepage})")
+            embed.add_field(name="Project Url", value="[{}, version {}]({})".format(search, module_version, project))
+            embed.add_field(name="Minimum Python version required", value=required_version[2:])
             await ctx.send(embed=embed)
         except aiohttp.client_exceptions.ContentTypeError:
-            await ctx.send(embed=discord.Embed(title="Module Cannot Be Found!",description=f"The module with the name **{search}** does not exist.",colour=discord.Colour.red()))
+            await ctx.send(embed=discord.Embed(title="Module Cannot Be Found!",
+                                               description=f"The module with the name **{search}** does not exist.",
+                                               colour=discord.Colour.red()))
         except discord.errors.HTTPException:
-            await ctx.send(embed=discord.Embed(title="Module Information Cannot Be Obtained",description=f"The module with the name **{search}** does not have a complete description, if one even exists.",colour=discord.Colour.red()))
+            await ctx.send(embed=discord.Embed(title="Module Information Cannot Be Obtained",
+                                               description=f"The module with the name **{search}** does not have a complete description, if one even exists.",
+                                               colour=discord.Colour.red()))
 
     @commands.command()
     async def pypisearch(self, ctx, module):
         '''gets a list of PyPI modules with roughly similar names'''
         async with aiohttp.ClientSession() as session:
-                async with session.get("https://pypi.org/search/?q=asyncpg") as response:
+                async with session.get("https://pypi.org/search/?"+urllib.parse.urlencode({"q":module})) as response:
                         f = await response.text()
         indicess=list(find('<h3 class="package-snippet__title">',f))
         indicese=list(find('</h3>',f))
@@ -855,7 +860,7 @@ async def on_ready():
     bot.add_cog(Images())
     await bot.change_presence(activity=discord.Game(name='Type [q?help] for help', type=2),status=discord.Status.dnd)
     f=bot.get_guild(413290013254615041).get_channel(436548366088798219)
-    if __file__ == r"C:\Users\vengat\Desktop\Bot\Quantum Bot\code.py":
+    if __file__ == r"C:/Users/vengat/Desktop/Bot/Quantum Bot/code.py":
         await f.send(embed=discord.Embed(title="Beta Bot Update tested on:",description=f"{datetime.datetime.utcnow(): %B %d, %Y at %H:%M:%S GMT}",colour=discord.Colour.blue()))
     else:
         await f.send(embed=discord.Embed(title="Bot Updated on:",description=f"{datetime.datetime.utcnow(): %B %d, %Y at %H:%M:%S GMT}",colour=discord.Colour.dark_gold()))
