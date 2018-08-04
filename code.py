@@ -814,6 +814,7 @@ async def on_reaction_add(reaction,user):
         await user.add_roles(member)
     elif reaction.message.channel.id==475197039974678530:
         member=discord.utils.get(user.guild.roles,name="Access Granted")
+        if member==None:raise SyntaxError("This role doesn't exist")
         await user.add_roles(member)
 
 @bot.event
