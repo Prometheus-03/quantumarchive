@@ -808,15 +808,14 @@ async def on_member_remove(member):
         await member.guild.get_channel(470431623079264258).send(embed=embed)
 
 @bot.event
-async def on_raw_reaction_add(reaction,user):
-    if reaction.message.channel.id==470431050649305098:
+async def on_raw_reaction_add(reaction):
+    if reaction.channel_id==470431050649305098:
         member=discord.utils.get(user.guild.roles,name="Member")
-        await user.add_roles(member)
-    elif reaction.message.channel.id==475197039974678530:
-        print("Someone reacted in this server.")
+        await bot.get_guild(reaction.guild_id).get_member(reaction.user_id).add_roles(member)
+    elif reaction.channel_id==475197039974678530:
         member=discord.utils.get(user.guild.roles,name="Access Granted")
         print(member)
-        await user.add_roles(member)
+        await bot.get_guild(reaction.guild_id).get_member(reaction.user_id).add_roles(member)
 
 @bot.event
 async def on_command_error(ctx,error):
