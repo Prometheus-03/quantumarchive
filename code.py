@@ -812,6 +812,9 @@ async def on_reaction_add(reaction,user):
     if reaction.message.channel.id==470431050649305098:
         member=discord.utils.get(user.guild.roles,name="Member")
         await user.add_roles(member)
+    elif reaction.message.channel.id==475197039974678530:
+        member=discord.utils.get(user.guild.roles,name="Access Granted")
+        await user.add_roles(member)
 
 @bot.event
 async def on_command_error(ctx,error):
