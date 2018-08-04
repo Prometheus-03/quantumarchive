@@ -808,7 +808,7 @@ async def on_member_remove(member):
         await member.guild.get_channel(470431623079264258).send(embed=embed)
 
 @bot.event
-async def on_reaction_add(reaction,user):
+async def on_raw_reaction_add(reaction,user):
     if reaction.message.channel.id==470431050649305098:
         member=discord.utils.get(user.guild.roles,name="Member")
         await user.add_roles(member)
