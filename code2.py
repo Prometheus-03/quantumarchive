@@ -9,6 +9,8 @@ import inspect
 import textwrap
 from contextlib import redirect_stdout
 import io
+from simplepaginator import SimplePaginator
+import utils
 ownerid = 360022804357185537
  
 class REPL():
@@ -72,9 +74,8 @@ class REPL():
             else:
                 self._last_result = ret
                 sendable=str(value)+str(ret)
-            for i in range(len(sendable)//1900):
-                await ctx.send('```py\n'+sendable[i*1990:(i+1)*1990]+'\n```')
-            await ctx.send('```py\n'''+sendable[len(sendable)//1990:]+'\n```')
+            sendlist=list(map(lambda x: "```"+x+"```",utils.partition(sendable,1950)))
+            await SimplePaginator(entries=sendlist, colour=0x00ff00, title="Output").paginate(ctx)
  
     @commands.command()
     async def repl(self, ctx):
