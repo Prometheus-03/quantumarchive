@@ -810,10 +810,10 @@ async def on_member_remove(member):
 @bot.event
 async def on_raw_reaction_add(reaction):
     if reaction.channel_id==470431050649305098:
-        member=discord.utils.get(bot.get_guild(user.guild_id).roles,name="Member")
+        member=discord.utils.get(bot.get_guild(reaction.guild_id).roles,name="Member")
         await bot.get_guild(reaction.guild_id).get_member(reaction.user_id).add_roles(member)
     elif reaction.channel_id==475197039974678530:
-        member=discord.utils.get(bot.get_guild(user.guild_id).roles,name="Access Granted")
+        member=discord.utils.get(bot.get_guild(reaction.guild_id).roles,name="Access Granted")
         print(member)
         await bot.get_guild(reaction.guild_id).get_member(reaction.user_id).add_roles(member)
 
