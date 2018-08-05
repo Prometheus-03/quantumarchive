@@ -21,6 +21,7 @@ import asyncio
 from googletrans import Translator
 
 from paginator import HelpPaginator
+from simplepaginator import SimplePaginator
 import utils
 blacklisted = []
 
@@ -80,6 +81,24 @@ info = Information()
 bot = commands.Bot(description='Tune in to lots of fun with this bot!',
                    command_prefix=commands.when_mentioned_or(*info.prefixes))
 
+class MemberInThisGuild(commands.Converter):
+    async def convert(self, ctx, argument):
+        if not ctx.guild:
+            raise commands.CheckError('This can only be run in a guild')
+        member = None
+        try:
+            id = int(argument)
+            member = ctx.guild.get_member(id)
+        except ValueError:
+            match = re.match("<!?@(\d+)>", argument)
+            if match:
+                id = int(match.group(1))
+                member = ctx.guild.get_member(id)
+            else:
+                member = ctx.guild.get_member_named(argument)
+                if member is None:
+                    raise commands.BadArgument('Unrecognised member')
+        return member
 
 # commands
 class Math:
@@ -131,25 +150,25 @@ class Admin:
     '''for administrative purposes'''
 
     @commands.command()
-    async def kick(self, ctx, member: discord.Member):
+    async def kick(self, ctx, member: MemberInThisGuild):
         '''Kick members from your server'''
         try:
-            await member.kick()
+            await member.kick(reason=f'{ctx.author} banned {member}')
             await ctx.message.add_reaction('\u2705')
         except:
             await ctx.message.add_reaction('\u274C')
 
     @commands.command()
-    async def ban(self, ctx, member: discord.Member):
+    async def ban(self, ctx, member: MemberInThisGuild):
         '''Ban toxic members from your server'''
         try:
-            await member.ban()
+            await member.ban(reason=f'{ctx.author} banned {member}')
             await ctx.message.add_reaction('\u2705')
         except:
             await ctx.message.add_reaction('\u274C')
 
     @commands.command(aliases=['ar', 'updaterole'])
-    async def changerole(self, ctx, member: discord.Member, role: discord.Role):
+    async def changerole(self, ctx, member: MemberInThisGuild, role: discord.Role):
         '''to add/remove a role from a person'''
         try:
             if role not in member.roles:
@@ -163,8 +182,15 @@ class Admin:
 
 class General:
     '''commands available for everyone'''
+    @commands.command(aliases=['how2makebots','howtomakebot','how2makebot'])
+    async def howtomakebots(self,ctx):
+        '''For people who want to make discord bots'''
+        await ctx.send(embed=discord.Embed(title="Join this server",
+                                           colour=discord.Colour.dark_blue(),
+                                           description="This server teaches how to make Discord Bots using Python or Javascript.\nClick Here --> [Bot Tutorial Server](https://discord.gg/GWdhBSp)").set_thumbnail(
+            url="https://images-ext-1.discordapp.net/external/3Nz9MrHwWr8gwkV8c7LBTioqIr4pX7akzwufLBQoMEM/%3Fsize%3D1024/https/cdn.discordapp.com/icons/265828729970753537/88327d2afd3b45a0e08cbd81caabf357.webp"))
 
-    @commands.command(pass_context=True)
+    @commands.command()
     async def ping(self, ctx):
         '''Call the bot'''
         msg = await ctx.send('Pong!')
@@ -513,13 +539,15 @@ class Owner:
         if ctx.author.id == info.owner_id:
             a = inspect.getsource(bot.get_command(command).callback)
             m = len(a) // 1900
+            embedlist=[]
             for x in range(m):
-                await ctx.send(embed=discord.Embed(title="Page {}/{} of '{}' command".format(x + 1, m + 1, command),
+                embedlist.append(discord.Embed(title="Page {}/{} of '{}' command".format(x + 1, m + 1, command),
                                                    description="```py\n" + a[1900 * x:1900 * (x + 1)] + "```",
                                                    colour=discord.Colour.dark_gold()))
-            await ctx.send(embed=discord.Embed(title="Page {}/{} of '{}' command".format(m + 1, m + 1, command),
+            embedlist.append(discord.Embed(title="Page {}/{} of '{}' command".format(m + 1, m + 1, command),
                                                description="```py\n" + a[1900 * m:] + "```",
                                                colour=discord.Colour.dark_gold()))
+            await SimplePaginator(extras=embedlist).paginate(ctx)
         else:
             await ctx.send(embed=discord.Embed(title="Access denied!",
                                                description="This command can only be used by the bot owner!",
@@ -696,8 +724,9 @@ class Media:
         pageids = query['pageids']
         title = list(query['pages'].values())[0]['title']
         extract = list(query['pages'].values())[0]['extract']
-        await ctx.send(embed=discord.Embed(title=title, description=extract[:max(
-            list(filter(lambda x: x < 1980, utils.find(". ", extract))))], colour=ctx.author.colour))
+        texts=utils.partition(extract,1000)
+        embedlist=[discord.Embed(title=title+" Page {}/{}".format(i+1,len(texts)),description=texts[i],colour=discord.Colour.lighter_grey()).set_thumbnail(url="https://images-ext-1.discordapp.net/external/CYCtSp1meQ0f_ZFd5y0T14UlI_xvqqLWPjUJ2gINt58/https/en.wikipedia.org/static/images/project-logos/enwiki.png") for i in range(len(texts))]
+        await SimplePaginator(extras=embedlist).paginate(ctx)
 
     @commands.command()
     async def xkcd(self, ctx, num: int = None):

@@ -56,12 +56,25 @@ class REPL():
         func = env['func']
         try:
             with redirect_stdout(stdout):
+                start=datetime.datetime.now()
                 ret = await func()
         except Exception as e:
+            end=datetime.datetime.now()
+            time_diff=(end-start).microseconds/1000
             await ctx.message.add_reaction('\u274C')
             value = stdout.getvalue()
-            await ctx.send('```py\n{}{}\n```'.format(value, traceback.format_exc()))
+            value=('```py\n{}{}\n```'.format(value, traceback.format_exc()))
+            sendlist = list(map(lambda x: "```" + x + "```", utils.partition(value, 1950)))
+            see = ""
+            embedlist = []
+            for i in range(len(sendlist)):
+                embedlist.append(
+                    discord.Embed(title="Page {}/{} of error".format(i + 1, len(sendlist)), description=sendlist[i],
+                                  colour=discord.Colour.red()).set_footer(text="Executed in {}ms".format(time_diff)))
+            await SimplePaginator(extras=embedlist).paginate(ctx)
         else:
+            end=datetime.datetime.now()
+            time_diff=(end-start).microseconds/1000
             value = stdout.getvalue()
             try:
                 await ctx.message.add_reaction('\u2705')
@@ -75,8 +88,15 @@ class REPL():
                 self._last_result = ret
                 sendable=str(value)+str(ret)
             sendlist=list(map(lambda x: "```"+x+"```",utils.partition(sendable,1950)))
-            await SimplePaginator(entries=sendlist, colour=0x00ff00, title="Output").paginate(ctx)
- 
+            see=""
+            embedlist=[]
+            for i in range(len(sendlist)):
+                embedlist.append(
+                    discord.Embed(title="Page {}/{} of output".format(i + 1, len(sendlist)), description=sendlist[i],
+                                  colour=discord.Colour.blurple()).set_footer(
+                        text="Executed in {} ms".format(time_diff)))
+            await SimplePaginator(extras=embedlist).paginate(ctx)
+
     @commands.command()
     async def repl(self, ctx):
         '''for bot owner to run series of commands'''

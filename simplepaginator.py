@@ -1,3 +1,10 @@
+import discord
+import asyncio
+
+async def pager(entries, chunk: int):
+    for x in range(0, len(entries), chunk):
+        yield entries[x:x + chunk]
+
 class SimplePaginator:
 
     __slots__ = ('entries', 'extras', 'title', 'description', 'colour', 'footer', 'length', 'prepend', 'append',
@@ -30,7 +37,7 @@ class SimplePaginator:
         self.eof = 0
 
         self.controls = {'⏮': 0.0, '◀': -1, '⏹': 'stop',
-                         '▶': +1, '⏭': None}
+                         '▶': +1, '⏭': None, }
 
     async def indexer(self, ctx, ctrl):
         if ctrl == 'stop':
@@ -121,7 +128,7 @@ class SimplePaginator:
                 self.pages.append(page)
 
         if not self.pages:
-            raise utils.EvieeBaseException('There must be enough data to create at least 1 page for pagination.')
+            raise SyntaxError('There must be enough data to create at least 1 page for pagination.')
 
         self.eof = float(len(self.pages) - 1)
         self.controls['⏭'] = self.eof
