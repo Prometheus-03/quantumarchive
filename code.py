@@ -24,6 +24,7 @@ from paginator import HelpPaginator
 from simplepaginator import SimplePaginator
 import utils
 blacklisted = []
+last_invoked=None
 
 # configs
 
@@ -192,13 +193,12 @@ class General:
 
     @commands.command()
     async def ping(self, ctx):
-        '''Call the bot'''
-        msg = await ctx.send('Pong!')
-        res = msg.created_at - ctx.message.created_at
-        res = utils.tdm(res)
-        lat = bot.latency * 1000
-        await msg.edit(
-            content='Pong! :ping_pong:\nBot response time: {}ms\nDiscord latency: {}ms'.format(res, round(lat, 1)))
+        '''checks the time taken for the bot to respond'''
+        start = time.monotonic()
+        msg = await ctx.send("Pinging... 🕒")
+        millis = (time.monotonic() - start) * 1000
+        heartbeat = ctx.bot.latency * 1000
+        await msg.edit(content=f'Heartbeat: {heartbeat:,.2f}ms Response: {millis:,.2f}ms. ⏲️')
 
     @commands.command()
     async def say(self, ctx, *, text='Quantum Bot here!!'):
@@ -373,6 +373,15 @@ Server Region:{}\nMember count:{}\nOwner:{}\nCreated On:{}\nNumber of text chann
 
 class Fun:
     '''have fun with these commands'''
+    @commands.command()
+    async def reinvoke(self, ctx):
+        '''reinvokes the last used command'''
+        global last_invoked
+        try:
+            await last_invoked.reinvoke()
+        except:
+            await ctx.send("Some error occurred.")
+        return
 
     @commands.command()
     async def dice(self, ctx, times=1):
@@ -623,8 +632,7 @@ class Pystuff():
                         discord.Embed(title="Python help Page [%d/%d]" % (len(a) // 1950 + 1, len(a) // 1950 + 1),
                                       description="```{}```".format(a[1950 * (len(a) // 1950):]),
                                       color=ctx.author.color))
-                    for i in embeds:
-                        await ctx.send(embed=i)
+                    await SimplePaginator(extras=embeds).paginate(ctx)
                 except NameError:
                     await ctx.send(
                         embed=discord.Embed(title="Error raised!", description="Object %s is not found!" % command))
@@ -978,6 +986,11 @@ async def on_raw_reaction_add(reaction):
         print(member)
         await bot.get_guild(reaction.guild_id).get_member(reaction.user_id).add_roles(member)
 
+@bot.event
+async def on_command(ctx):
+    global last_invoked
+    last_invoked=ctx
+    print("Invocation of "+ctx.command.name+" by "+ctx.author.name)
 
 @bot.event
 async def on_command_error(ctx, error):
