@@ -20,6 +20,7 @@ import subprocess
 import asyncio
 from googletrans import Translator
 
+from databasestuff import GuildDB
 from paginator import HelpPaginator
 from simplepaginator import SimplePaginator
 import utils
@@ -35,21 +36,7 @@ class Information:
         self.dict_app_id = 'ebbdd492'
         self.prefixes = (
         'q!', 'q>', 'q<', 'q+', 'q-', 'q*', 'q/', 'q?', 'q.', 'q,', 'q:', 'q;', 'Q!', 'Q>', 'Q<', 'Q+', 'Q-', 'Q*',
-        'Q/', 'Q?', 'Q.', 'Q,', 'Q:', 'Q;', 'quantum ', 'quantuM ', 'quantUm ', 'quantUM ', 'quanTum ', 'quanTuM ',
-        'quanTUm ', 'quanTUM ', 'quaNtum ', 'quaNtuM ', 'quaNtUm ', 'quaNtUM ', 'quaNTum ', 'quaNTuM ', 'quaNTUm ',
-        'quaNTUM ', 'quAntum ', 'quAntuM ', 'quAntUm ', 'quAntUM ', 'quAnTum ', 'quAnTuM ', 'quAnTUm ', 'quAnTUM ',
-        'quANtum ', 'quANtuM ', 'quANtUm ', 'quANtUM ', 'quANTum ', 'quANTuM ', 'quANTUm ', 'quANTUM ', 'qUantum ',
-        'qUantuM ', 'qUantUm ', 'qUantUM ', 'qUanTum ', 'qUanTuM ', 'qUanTUm ', 'qUanTUM ', 'qUaNtum ', 'qUaNtuM ',
-        'qUaNtUm ', 'qUaNtUM ', 'qUaNTum ', 'qUaNTuM ', 'qUaNTUm ', 'qUaNTUM ', 'qUAntum ', 'qUAntuM ', 'qUAntUm ',
-        'qUAntUM ', 'qUAnTum ', 'qUAnTuM ', 'qUAnTUm ', 'qUAnTUM ', 'qUANtum ', 'qUANtuM ', 'qUANtUm ', 'qUANtUM ',
-        'qUANTum ', 'qUANTuM ', 'qUANTUm ', 'qUANTUM ', 'Quantum ', 'QuantuM ', 'QuantUm ', 'QuantUM ', 'QuanTum ',
-        'QuanTuM ', 'QuanTUm ', 'QuanTUM ', 'QuaNtum ', 'QuaNtuM ', 'QuaNtUm ', 'QuaNtUM ', 'QuaNTum ', 'QuaNTuM ',
-        'QuaNTUm ', 'QuaNTUM ', 'QuAntum ', 'QuAntuM ', 'QuAntUm ', 'QuAntUM ', 'QuAnTum ', 'QuAnTuM ', 'QuAnTUm ',
-        'QuAnTUM ', 'QuANtum ', 'QuANtuM ', 'QuANtUm ', 'QuANtUM ', 'QuANTum ', 'QuANTuM ', 'QuANTUm ', 'QuANTUM ',
-        'QUantum ', 'QUantuM ', 'QUantUm ', 'QUantUM ', 'QUanTum ', 'QUanTuM ', 'QUanTUm ', 'QUanTUM ', 'QUaNtum ',
-        'QUaNtuM ', 'QUaNtUm ', 'QUaNtUM ', 'QUaNTum ', 'QUaNTuM ', 'QUaNTUm ', 'QUaNTUM ', 'QUAntum ', 'QUAntuM ',
-        'QUAntUm ', 'QUAntUM ', 'QUAnTum ', 'QUAnTuM ', 'QUAnTUm ', 'QUAnTUM ', 'QUANtum ', 'QUANtuM ', 'QUANtUm ',
-        'QUANtUM ', 'QUANTum ', 'QUANTuM ', 'QUANTUm ', 'QUANTUM ')
+        'Q/', 'Q?', 'Q.', 'Q,', 'Q:', 'Q;')
         self.dict_app_key = 'b9942f0306456037953c7481b7f036ca'
         self.languages = {'af': 'afrikaans', 'sq': 'albanian', 'am': 'amharic', 'ar': 'arabic', 'hy': 'armenian',
                           'az': 'azerbaijani', 'eu': 'basque', 'be': 'belarusian',
@@ -76,11 +63,11 @@ class Information:
                           'uk': 'ukrainian', 'ur': 'urdu', 'uz': 'uzbek', 'vi': 'vietnamese', 'cy': 'welsh',
                           'xh': 'xhosa', 'yi': 'yiddish', 'yo': 'yoruba', 'zu': 'zulu', 'fil': 'Filipino',
                           'he': 'Hebrew'}
+info=Information()
 
-
-info = Information()
 bot = commands.Bot(description='Tune in to lots of fun with this bot!',
                    command_prefix=commands.when_mentioned_or(*info.prefixes))
+bot.db=GuildDB()
 
 class MemberInThisGuild(commands.Converter):
     async def convert(self, ctx, argument):
@@ -931,7 +918,29 @@ class Images:
             embed.set_image(url=random.choice(cats.readlines()))
         await ctx.send(embed=embed)
 
-
+class Beta:
+    @commands.cooldown(rate=1,per=10)
+    @commands.command()
+    async def bump(self,ctx,member:discord.Member=None):
+        '''bump Quantum Bot up, see your bump statistics'''
+        await bot.db.add_collection("bumps")
+        if member is None:
+            authorbump=await bot.db.find(author=str(ctx.author.id))
+            await ctx.send("Bumped!")
+            if len(authorbump)==0:
+                await bot.db.insert(author=str(ctx.author.id),bumps=1)
+            else:
+                currauthor=authorbump[0]
+                currcount=currauthor["bumps"]
+                await bot.db.delete(author=currauthor["author"])
+                await bot.db.insert(author=str(ctx.author.id),bumps=(currcount+1))
+        else:
+            member_ent=await bot.db.find(author=str(member.id))
+            if len(member_ent)==0:
+                num="0"
+            else:
+                num=str(member_ent[0]["bumps"])
+            await ctx.send(embed=discord.Embed(title=f"Number of times {member.display_name} bumped",description=num,colour=discord.Colour.blue()))
 # everything from here onwards are bot events
 
 @bot.event
@@ -1046,6 +1055,7 @@ async def on_ready():
     bot.add_cog(Fun())
     bot.add_cog(Media())
     bot.add_cog(Images())
+    bot.add_cog(Beta())
     await bot.change_presence(activity=discord.Game(name='Type [q?help] for help', type=2), status=discord.Status.dnd)
     f = bot.get_guild(413290013254615041).get_channel(436548366088798219)
     if __file__ == r"C:/Users/vengat/Desktop/Bot/Quantum Bot/code.py":
