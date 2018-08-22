@@ -918,8 +918,9 @@ class Images:
             embed.set_image(url=random.choice(cats.readlines()))
         await ctx.send(embed=embed)
 
-class Beta:
-    @commands.cooldown(rate=1,per=10)
+class Data:
+    '''these commands store data'''
+    @commands.cooldown(rate=1,per=5)
     @commands.command()
     async def bump(self,ctx,member:discord.Member=None):
         '''bump Quantum Bot up, see your bump statistics'''
@@ -941,6 +942,10 @@ class Beta:
             else:
                 num=str(member_ent[0]["bumps"])
             await ctx.send(embed=discord.Embed(title=f"Number of times {member.display_name} bumped",description=num,colour=discord.Colour.blue()))
+
+class Beta:
+    '''for commands in testing'''
+    pass
 # everything from here onwards are bot events
 
 @bot.event
@@ -1055,6 +1060,7 @@ async def on_ready():
     bot.add_cog(Fun())
     bot.add_cog(Media())
     bot.add_cog(Images())
+    bot.add_cog(Data())
     bot.add_cog(Beta())
     await bot.change_presence(activity=discord.Game(name='Type [q?help] for help', type=2), status=discord.Status.dnd)
     f = bot.get_guild(413290013254615041).get_channel(436548366088798219)
@@ -1074,7 +1080,6 @@ async def on_ready():
             possb = 'Type [{}help] for help'.format(random.choice(info.prefixes))
             await bot.change_presence(activity=discord.Game(possb, status=discord.Status.dnd))
             await asyncio.sleep(timeout)
-
     bot.loop.create_task(change_activities())
 
 
