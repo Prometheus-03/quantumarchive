@@ -925,7 +925,7 @@ class Data:
     async def bump(self,ctx,member:discord.Member=None):
         '''bump Quantum Bot up, see your bump statistics'''
         await bot.db.add_collection("bumps")
-        if member is None:
+        if member is None and not ctx.author.bot:
             authorbump=await bot.db.find(author=str(ctx.author.id))
             await ctx.send("Bumped!")
             if len(authorbump)==0:
