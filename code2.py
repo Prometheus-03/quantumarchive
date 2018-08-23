@@ -63,7 +63,7 @@ class REPL():
             time_diff=(end-start).microseconds/1000
             await ctx.message.add_reaction('\u274C')
             value = stdout.getvalue()
-            value=('```py\n{}{}\n```'.format(value, traceback.format_exc()))
+            value=('py\n{}{}\n'.format(value, traceback.format_exc()))
             sendlist = list(map(lambda x: "```" + x + "```", utils.partition(value, 1950)))
             see = ""
             embedlist = []

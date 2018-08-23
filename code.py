@@ -65,8 +65,15 @@ class Information:
                           'he': 'Hebrew'}
 info=Information()
 
+async def getprefix(bot,message:discord.Member):
+    bot.db.set_collection("guilds")
+    m = await bot.db.find(length=2,id=message.guild.id)
+    if m:
+        m=[m[0]["prefix"]]
+    return commands.when_mentioned_or(*(list(info.prefixes)+m))(bot,message)
+
 bot = commands.Bot(description='Tune in to lots of fun with this bot!',
-                   command_prefix=commands.when_mentioned_or(*info.prefixes))
+                   command_prefix=getprefix)
 bot.db=GuildDB()
 
 class MemberInThisGuild(commands.Converter):
@@ -924,40 +931,74 @@ class Data:
     @commands.command()
     async def bump(self,ctx,member:discord.Member=None):
         '''bump Quantum Bot up, see your bump statistics'''
+        bot.db.set_collection("bumps")
         if member is None and not ctx.author.bot:
-            authorbump=await bot.db.find(author=str(ctx.author.id))
-            await ctx.send("Bumped!")
-            if len(authorbump)==0:
-                await bot.db.insert(author=str(ctx.author.id),bumps=1)
-            else:
-                currauthor=authorbump[0]
-                currcount=currauthor["bumps"]
-                await bot.db.delete(author=currauthor["author"])
-                await bot.db.insert(author=str(ctx.author.id),bumps=(currcount+1))
+            async with ctx.typing():
+                authorbump=await bot.db.find(author=str(ctx.author.id))
+                if len(authorbump)==0:
+                    await bot.db.insert(author=str(ctx.author.id),bumps=1)
+                else:
+                    currauthor=authorbump[0]
+                    currcount=currauthor["bumps"]
+                    await bot.db.delete(author=currauthor["author"])
+                    await bot.db.insert(author=str(ctx.author.id),bumps=(currcount+1))
+            await ctx.send(embed=discord.Embed(title="Bumping successful!",colour=discord.Colour.dark_green()))
         else:
-            member_ent=await bot.db.find(author=str(member.id))
-            if len(member_ent)==0:
-                num="0"
-            else:
-                num=str(member_ent[0]["bumps"])
+            async with ctx.typing():
+                member_ent=await bot.db.find(author=str(member.id))
+                if len(member_ent)==0:
+                    num="0"
+                else:
+                    num=str(member_ent[0]["bumps"])
             await ctx.send(embed=discord.Embed(title=f"Number of times {member.display_name} bumped",description=num,colour=discord.Colour.blue()))
 
-
-class Beta:
-    '''for commands in testing'''
     @commands.cooldown(rate=1, per=5)
     @commands.command()
     async def bumpboard(self, ctx):
         '''to see the top 10 bumps leaderboard'''
-        people = await bot.db.find(length=10)
-        people.sort(key=lambda x:x["bumps"],reverse=True)
-        sendable = []
-        formatlength = max(map(lambda x:len(x["author"]),people))+2
-        count=0
-        for person in people:
-            count+=1
-            sendable.append(("%2d. %"+str(formatlength)+"s %d")%(count,person["author"],person["bumps"]))
-        await ctx.send(embed=discord.Embed(title="Bump Leaderboards",description="```"+("\n".join(sendable))+"```",colour=discord.Colour.darker_grey()))
+        async with ctx.typing():
+            people = await bot.db.find(length=10)
+            people.sort(key=lambda x: x["bumps"], reverse=True)
+            count = 0
+            sendembed = discord.Embed(title="Bump Leaderboards", colour=discord.Colour.darker_grey())
+            for person in people:
+                count += 1
+                sendembed.add_field(name="#%d, with %d bumps" % (count, person["bumps"]),
+                                value=discord.utils.get(bot.users, id=int(person["author"])))
+        await ctx.send(embed=sendembed)
+class Beta:
+    '''for commands in testing'''
+    @commands.cooldown(rate=1, per=5)
+    @commands.command()
+    async def customprefix(self,ctx,prefix:str=None):
+        '''sets the custom bot prefix for your guild, sets the prefix if you specified any, provided no spaces'''
+        bot.db.set_collection("guilds")
+        async with ctx.typing():
+            res=await bot.db.find(length=1,id=ctx.guild.id)
+            if res:
+                res=res[0]
+                if prefix==None:
+                    customprefix=res["prefix"]
+                    embed=discord.Embed(title="This guild's custom prefix",description=customprefix,colour=discord.Colour.dark_gold())
+                else:
+                    if ctx.author.guild_permissions.manage_guild or ctx.author.id==info.owner_id:
+                        await bot.db.delete(id=ctx.guild.id)
+                        await bot.db.insert(id=ctx.guild.id,prefix=prefix)
+                        embed=discord.Embed(title="Successfully set this guild's custom prefix!",colour=discord.Colour.dark_green())
+                    else:
+                        embed=discord.Embed(title="Operation failed!",description="You couldn't change this guild's custom prefix!",colour=discord.Colour.red())
+            else:
+                if prefix==None:
+                    customprefix = "None set yet"
+                    embed = discord.Embed(title="This guild's custom prefix", description=customprefix,
+                                          colour=discord.Colour.dark_gold())
+                else:
+                    if ctx.author.guild_permissions.manage_guild or ctx.author.id==info.owner_id:
+                        await bot.db.insert(id=ctx.guild.id,prefix=prefix)
+                        embed=discord.Embed(title="Successfully set this guild's custom prefix!",description="This is the first time you're setting my custom prefix!!",colour=discord.Colour.dark_green())
+                    else:
+                        embed=discord.Embed(title="Operation failed!",description="You couldn't change this guild's custom prefix!",colour=discord.Colour.red())
+        await ctx.send(embed=embed)
 
 # everything from here onwards are bot events
 
@@ -1017,7 +1058,7 @@ async def on_raw_reaction_add(reaction):
 async def on_command(ctx):
     global last_invoked
     last_invoked=ctx
-    print("Invocation of "+ctx.command.name+" by "+ctx.author.name)
+    if ctx.command.name not in "execrepl":print("Invocation of "+ctx.command.name+" by "+ctx.author.name)
 
 @bot.event
 async def on_command_error(ctx, error):
@@ -1077,6 +1118,8 @@ async def on_ready():
     bot.add_cog(Beta())
     await bot.change_presence(activity=discord.Game(name='Type [q?help] for help', type=2), status=discord.Status.dnd)
     f = bot.get_guild(413290013254615041).get_channel(436548366088798219)
+    await bot.db.add_collection("bumps")
+    await bot.db.add_collection("guilds")
     if __file__ == r"C:/Users/vengat/Desktop/Bot/Quantum Bot/code.py":
         await f.send(embed=discord.Embed(title="Beta Bot Update tested on:",
                                          description=f"{datetime.datetime.utcnow(): %B %d, %Y at %H:%M:%S GMT}",
@@ -1085,7 +1128,6 @@ async def on_ready():
         await f.send(embed=discord.Embed(title="Bot Updated on:",
                                          description=f"{datetime.datetime.utcnow(): %B %d, %Y at %H:%M:%S GMT}",
                                          colour=discord.Colour.dark_gold()))
-    await bot.db.add_collection("bumps")
     print("Bot works, go on.")
 
     async def change_activities():
