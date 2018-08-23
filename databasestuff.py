@@ -23,10 +23,10 @@ class GuildDB:
             await self.insert(**i)
     async def delete(self,**kwargs):
         await self.db[self.collection].delete_many(kwargs)
-    async def find(self,**kwargs):
+    async def find(self,length=1000,**kwargs):
         cursor=self.db[self.collection].find(kwargs)
         res=[]
-        for doc in await cursor.to_list(length=100):
+        for doc in await cursor.to_list(length=length):
             res.append(doc)
         return res
     async def print_db(self):

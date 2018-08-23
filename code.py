@@ -924,7 +924,6 @@ class Data:
     @commands.command()
     async def bump(self,ctx,member:discord.Member=None):
         '''bump Quantum Bot up, see your bump statistics'''
-        await bot.db.add_collection("bumps")
         if member is None and not ctx.author.bot:
             authorbump=await bot.db.find(author=str(ctx.author.id))
             await ctx.send("Bumped!")
@@ -943,9 +942,23 @@ class Data:
                 num=str(member_ent[0]["bumps"])
             await ctx.send(embed=discord.Embed(title=f"Number of times {member.display_name} bumped",description=num,colour=discord.Colour.blue()))
 
+
 class Beta:
     '''for commands in testing'''
-    pass
+    @commands.cooldown(rate=1, per=5)
+    @commands.command()
+    async def bumpboard(self, ctx):
+        '''to see the top 10 bumps leaderboard'''
+        people = await bot.db.find(length=10)
+        people.sort(key=lambda x:x["bumps"],reverse=True)
+        sendable = []
+        formatlength = max(map(lambda x:len(x["author"]),people))+2
+        count=0
+        for person in people:
+            count+=1
+            sendable.append(("%2d. %"+str(formatlength)+"s %d")%(count,person["author"],person["bumps"]))
+        await ctx.send(embed=discord.Embed(title="Bump Leaderboards",description="```"+("\n".join(sendable))+"```",colour=discord.Colour.darker_grey()))
+
 # everything from here onwards are bot events
 
 @bot.event
@@ -1072,6 +1085,7 @@ async def on_ready():
         await f.send(embed=discord.Embed(title="Bot Updated on:",
                                          description=f"{datetime.datetime.utcnow(): %B %d, %Y at %H:%M:%S GMT}",
                                          colour=discord.Colour.dark_gold()))
+    await bot.db.add_collection("bumps")
     print("Bot works, go on.")
 
     async def change_activities():
