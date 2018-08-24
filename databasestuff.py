@@ -27,6 +27,7 @@ class GuildDB:
         cursor=self.db[self.collection].find(kwargs)
         res=[]
         for doc in await cursor.to_list(length=length):
+            doc.setdefault("")
             res.append(doc)
         return res
     async def print_db(self):

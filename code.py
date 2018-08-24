@@ -966,39 +966,60 @@ class Data:
                 sendembed.add_field(name="#%d, with %d bumps" % (count, person["bumps"]),
                                 value=discord.utils.get(bot.users, id=int(person["author"])))
         await ctx.send(embed=sendembed)
-class Beta:
-    '''for commands in testing'''
+
     @commands.cooldown(rate=1, per=5)
     @commands.command()
-    async def customprefix(self,ctx,prefix:str=None):
+    async def customprefix(self, ctx, prefix: str = None):
         '''sets the custom bot prefix for your guild, sets the prefix if you specified any, provided no spaces'''
         bot.db.set_collection("guilds")
         async with ctx.typing():
-            res=await bot.db.find(length=1,id=ctx.guild.id)
+            res = await bot.db.find(length=1, id=ctx.guild.id)
             if res:
-                res=res[0]
-                if prefix==None:
-                    customprefix=res["prefix"]
-                    embed=discord.Embed(title="This guild's custom prefix",description=customprefix,colour=discord.Colour.dark_gold())
+                res = res[0]
+                if prefix == None:
+                    try:
+                        customprefix = res["prefix"]
+                    except KeyError:
+                        embed = discord.Embed(title="This guild's custom prefix", description="Not set yet",
+                                              colour=discord.Colour.dark_gold())
+                    else:embed = discord.Embed(title="This guild's custom prefix", description=customprefix,
+                                               colour=discord.Colour.dark_gold())
                 else:
-                    if ctx.author.guild_permissions.manage_guild or ctx.author.id==info.owner_id:
+                    if ctx.author.guild_permissions.manage_guild or ctx.author.id == info.owner_id:
                         await bot.db.delete(id=ctx.guild.id)
-                        await bot.db.insert(id=ctx.guild.id,prefix=prefix)
-                        embed=discord.Embed(title="Successfully set this guild's custom prefix!",colour=discord.Colour.dark_green())
+                        await bot.db.insert(id=ctx.guild.id, prefix=prefix)
+                        embed = discord.Embed(title="Successfully set this guild's custom prefix!",
+                                              colour=discord.Colour.dark_green())
                     else:
-                        embed=discord.Embed(title="Operation failed!",description="You couldn't change this guild's custom prefix!",colour=discord.Colour.red())
+                        embed = discord.Embed(title="Operation failed!",
+                                              description="You couldn't change this guild's custom prefix!",
+                                              colour=discord.Colour.red())
             else:
-                if prefix==None:
+                if prefix == None:
                     customprefix = "None set yet"
                     embed = discord.Embed(title="This guild's custom prefix", description=customprefix,
                                           colour=discord.Colour.dark_gold())
                 else:
-                    if ctx.author.guild_permissions.manage_guild or ctx.author.id==info.owner_id:
-                        await bot.db.insert(id=ctx.guild.id,prefix=prefix)
-                        embed=discord.Embed(title="Successfully set this guild's custom prefix!",description="This is the first time you're setting my custom prefix!!",colour=discord.Colour.dark_green())
+                    if ctx.author.guild_permissions.manage_guild or ctx.author.id == info.owner_id:
+                        await bot.db.insert(id=ctx.guild.id, prefix=prefix)
+                        embed = discord.Embed(title="Successfully set this guild's custom prefix!",
+                                              description="This is the first time you're setting my custom prefix!!",
+                                              colour=discord.Colour.dark_green())
                     else:
-                        embed=discord.Embed(title="Operation failed!",description="You couldn't change this guild's custom prefix!",colour=discord.Colour.red())
+                        embed = discord.Embed(title="Operation failed!",
+                                              description="You couldn't change this guild's custom prefix!",
+                                              colour=discord.Colour.red())
         await ctx.send(embed=embed)
+
+class Beta:
+    '''for commands in testing'''
+
+    @commands.cooldown(rate=1, per=5)
+    @commands.command()
+    async def autorole(self,ctx,*,rolename:str=None):
+        bot.db.set_collection("guilds")
+        await ctx.send("In-dev")
+
 
 # everything from here onwards are bot events
 
