@@ -2,6 +2,7 @@
 The bot. Made by Pegasus
 
 Tasks:
-[] Paginator
-[] Bug Fixes
-[] memes command
+- [ ] Make an autorole system.
+- [ ] Fix bugs in the bumpboard command.
+- [ ] Organize commands into cogs.
+- [ ] Work on PIL related commands.
