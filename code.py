@@ -25,7 +25,6 @@ from paginator import HelpPaginator
 from simplepaginator import SimplePaginator
 import utils
 blacklisted = []
-last_invoked=None
 
 # configs
 
@@ -367,16 +366,6 @@ Server Region:{}\nMember count:{}\nOwner:{}\nCreated On:{}\nNumber of text chann
 
 class Fun:
     '''have fun with these commands'''
-    @commands.command()
-    async def reinvoke(self, ctx):
-        '''reinvokes the last used command'''
-        global last_invoked
-        try:
-            await last_invoked.reinvoke()
-        except:
-            await ctx.send("Some error occurred.")
-        return
-
     @commands.command()
     async def dice(self, ctx, times=1):
         '''Roll a dice as many times as you like'''
@@ -957,6 +946,7 @@ class Data:
     async def bumpboard(self, ctx):
         '''to see the top 10 bumps leaderboard'''
         async with ctx.typing():
+            bot.db.set_collection("bumps")
             people = await bot.db.find(length=10)
             people.sort(key=lambda x: x["bumps"], reverse=True)
             count = 0
@@ -1013,13 +1003,10 @@ class Data:
 
 class Beta:
     '''for commands in testing'''
-
-    @commands.cooldown(rate=1, per=5)
+    @commands.cooldown(rate=1,per=5)
     @commands.command()
     async def autorole(self,ctx,*,rolename:str=None):
-        bot.db.set_collection("guilds")
-        await ctx.send("In-dev")
-
+        pass
 
 # everything from here onwards are bot events
 
@@ -1077,8 +1064,6 @@ async def on_raw_reaction_add(reaction):
 
 @bot.event
 async def on_command(ctx):
-    global last_invoked
-    last_invoked=ctx
     if ctx.command.name not in "execrepl":print("Invocation of "+ctx.command.name+" by "+ctx.author.name)
 
 @bot.event
