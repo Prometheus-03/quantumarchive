@@ -15,61 +15,23 @@ import re
 import io
 import contextlib
 import traceback
-import sys
-import subprocess
 import asyncio
 from googletrans import Translator
-
+import json
 from databasestuff import GuildDB
-from paginator import HelpPaginator
+from paginator import *
 from simplepaginator import SimplePaginator
 import utils
 blacklisted = []
 
-# configs
-
-class Information:
-    def __init__(self):
-        self.owner_id = 360022804357185537
-        self.bot_id = 384623978028859392
-        self.dict_app_id = 'ebbdd492'
-        self.prefixes = (
-        'q!', 'q>', 'q<', 'q+', 'q-', 'q*', 'q/', 'q?', 'q.', 'q,', 'q:', 'q;', 'Q!', 'Q>', 'Q<', 'Q+', 'Q-', 'Q*',
-        'Q/', 'Q?', 'Q.', 'Q,', 'Q:', 'Q;')
-        self.dict_app_key = 'b9942f0306456037953c7481b7f036ca'
-        self.languages = {'af': 'afrikaans', 'sq': 'albanian', 'am': 'amharic', 'ar': 'arabic', 'hy': 'armenian',
-                          'az': 'azerbaijani', 'eu': 'basque', 'be': 'belarusian',
-                          'bn': 'bengali', 'bs': 'bosnian', 'bg': 'bulgarian', 'ca': 'catalan', 'ceb': 'cebuano',
-                          'ny': 'chichewa', 'zh-cn': 'chinese (simplified)',
-                          'zh-tw': 'chinese (traditional)', 'co': 'corsican', 'hr': 'croatian', 'cs': 'czech',
-                          'da': 'danish', 'nl': 'dutch', 'en': 'english', 'eo': 'esperanto',
-                          'et': 'estonian', 'tl': 'filipino', 'fi': 'finnish', 'fr': 'french', 'fy': 'frisian',
-                          'gl': 'galician', 'ka': 'georgian', 'de': 'german', 'el': 'greek',
-                          'gu': 'gujarati', 'ht': 'haitian creole', 'ha': 'hausa', 'haw': 'hawaiian', 'iw': 'hebrew',
-                          'hi': 'hindi', 'hmn': 'hmong', 'hu': 'hungarian', 'is': 'icelandic',
-                          'ig': 'igbo', 'id': 'indonesian', 'ga': 'irish', 'it': 'italian', 'ja': 'japanese',
-                          'jw': 'javanese', 'kn': 'kannada', 'kk': 'kazakh', 'km': 'khmer',
-                          'ko': 'korean', 'ku': 'kurdish (kurmanji)', 'ky': 'kyrgyz', 'lo': 'lao', 'la': 'latin',
-                          'lv': 'latvian', 'lt': 'lithuanian', 'lb': 'luxembourgish',
-                          'mk': 'macedonian', 'mg': 'malagasy', 'ms': 'malay', 'ml': 'malayalam', 'mt': 'maltese',
-                          'mi': 'maori', 'mr': 'marathi', 'mn': 'mongolian', 'my': 'myanmar (burmese)',
-                          'ne': 'nepali', 'no': 'norwegian', 'ps': 'pashto', 'fa': 'persian', 'pl': 'polish',
-                          'pt': 'portuguese', 'pa': 'punjabi', 'ro': 'romanian', 'ru': 'russian',
-                          'sm': 'samoan', 'gd': 'scots gaelic', 'sr': 'serbian', 'st': 'sesotho', 'sn': 'shona',
-                          'sd': 'sindhi', 'si': 'sinhala', 'sk': 'slovak', 'sl': 'slovenian',
-                          'so': 'somali', 'es': 'spanish', 'su': 'sundanese', 'sw': 'swahili', 'sv': 'swedish',
-                          'tg': 'tajik', 'ta': 'tamil', 'te': 'telugu', 'th': 'thai', 'tr': 'turkish',
-                          'uk': 'ukrainian', 'ur': 'urdu', 'uz': 'uzbek', 'vi': 'vietnamese', 'cy': 'welsh',
-                          'xh': 'xhosa', 'yi': 'yiddish', 'yo': 'yoruba', 'zu': 'zulu', 'fil': 'Filipino',
-                          'he': 'Hebrew'}
-info=Information()
+info = json.loads(open("configs.json").read())
 
 async def getprefix(bot,message:discord.Member):
     bot.db.set_collection("guilds")
     m = await bot.db.find(length=2,id=message.guild.id)
     if m:
         m=[m[0]["prefix"]]
-    return commands.when_mentioned_or(*(list(info.prefixes)+m))(bot,message)
+    return commands.when_mentioned_or(*(list(info["bot"]["prefixes"])+m))(bot,message)
 
 bot = commands.Bot(description='Tune in to lots of fun with this bot!',
                    command_prefix=getprefix)
@@ -230,7 +192,7 @@ class Feedback:
                                 color=ctx.author.color))
         await m.add_reaction("\u2705")
         await m.add_reaction("\u274C")
-        r = await bot.wait_for('reaction_add', check=lambda reaction, author: (author.id == info.owner_id) and (
+        r = await bot.wait_for('reaction_add', check=lambda reaction, author: (author.id == info["hierarchy"]["owner"]) and (
                     reaction.emoji in ["\u2705", "\u274C"]))
         if r[0].emoji == "\u2705":
             await ctx.author.send("Your command {} has been accepted by the owner.".format(command))
@@ -242,7 +204,6 @@ class Feedback:
 
 class Information:
     '''To know more about the bot'''
-
     @commands.command()
     async def botinfo(self, ctx):
         '''some stats about the bot'''
@@ -257,7 +218,7 @@ class Information:
     @commands.command()
     async def prefix(self, ctx):
         '''list of all prefixes my bot uses'''
-        prefixlist = tuple(["@Quantum Bot"] + list(info.prefixes))
+        prefixlist = tuple(["@Quantum Bot"] + list(info["bot"]["prefixes"]))
         await ctx.send("```" + ",".join(list(prefixlist)) + "```" + '\n' + str(len(prefixlist)) + " prefixes")
 
     @commands.command()
@@ -479,7 +440,7 @@ class Fun:
         '''Rest in piece, my comrade'''
         if member is None:
             member = ctx.author
-        elif member.id == info.owner_id or member.id == info.bot_id:
+        elif member.id == info["hierarchy"]["owner"] or member.id == info["hierarchy"]["bot_id"]:
             member = ctx.author
         embed = discord.Embed(title="RIP {}{}".format(member.name, discord.utils.get(bot.emojis, name="rip")),
                               description="Press :regional_indicator_f: to pay your respects",
@@ -493,8 +454,8 @@ class Fun:
         '''returns the current bot status'''
         async with ctx.typing():
             embed = discord.Embed(title="Quantum Bot's status:",
-                                  description=ctx.guild.get_member(info.bot_id).activity.name)
-            embed.set_thumbnail(url=ctx.guild.get_member(info.bot_id).avatar_url)
+                                  description=ctx.guild.get_member(info["hierarchy"]["bot"]).activity.name)
+            embed.set_thumbnail(url=ctx.guild.get_member(info["hierarchy"]["bot"]).avatar_url)
         await ctx.send(embed=embed)
 
 
@@ -504,7 +465,7 @@ class Owner:
     @commands.command(pass_context=True)
     async def shutdown(self, ctx):
         '''for me to close the bot'''
-        if ctx.message.author.id != info.owner_id:
+        if ctx.message.author.id != info["hierarchy"]["owner"]:
             await ctx.send("You're not the bot owner!")
         else:
             await ctx.send("Shutting down...")
@@ -513,7 +474,7 @@ class Owner:
     @commands.command()
     async def clear(self, ctx, number=1, author: discord.Member = None):
         '''[WIP] clears messages from a channel, if you're allowed'''
-        allowed = [360022804357185537, 270149861398151169]
+        allowed = info["hierarchy"]["owner"]
         if ctx.author.id in allowed or ctx.author.guild_permissions.manage_messages:
             if author is not None:
                 check = lambda x: x.author == author
@@ -528,7 +489,8 @@ class Owner:
     @commands.command()
     async def getsource(self, ctx, command):
         '''getting the code for command'''
-        if ctx.author.id == info.owner_id:
+        people = info["hierarchy"]
+        if ctx.author.id in people["owner"]+people["collaborators"]+people["special"]:
             a = inspect.getsource(bot.get_command(command).callback)
             m = len(a) // 1900
             embedlist=[]
@@ -548,7 +510,7 @@ class Owner:
     @commands.command(pass_context=True)
     async def warn(self, ctx, member: discord.Member, serious: bool, *, reason):
         '''for owner to issue warnings'''
-        if ctx.author.id == info.owner_id:
+        if ctx.author.id == info["hierarchy"]["owner"]:
             if serious:
                 await ctx.guild.get_member(member.id).send(embed=discord.Embed(title="Warning! [SERIOUS]",
                                                                                description="**My bot owner warned your because**:{}".format(
@@ -561,14 +523,18 @@ class Owner:
                                                                                colour=discord.Colour(0xFFFF00)))
             await ctx.message.add_reaction('\u2705')
 
-
 class Pystuff():
     '''commands that relate to Python coding'''
 
     @commands.command()
     async def pydir(self, ctx, *, command=None):
         '''list of methods of a given object'''
-        if ctx.message.author.id != info.owner_id:
+        people = info["hierarchy"]
+        for i in ["bot.http.token","open("]:
+            if i in command:
+                await ctx.send(embed=discord.Embed(title="Access Denied!",description="You are not allowed to use these.",colour=discord.Colour.red()))
+                return
+        if ctx.message.author.id not in people["owner"]+people["collaborators"]+people["special"]:
             await ctx.send(embed=discord.Embed(title="Error message", color=eval(hex(ctx.author.color.value)),
                                                description="Not allowed!"))
         else:
@@ -592,7 +558,7 @@ class Pystuff():
     @commands.command()
     async def pyhelp(self, ctx, *, command=None):
         '''the Python help message for a given object'''
-        if ctx.message.author.id != info.owner_id:
+        if ctx.message.author.id not in people["owner"]+people["collaborators"]+people["special"] or "bot.http.token" in command or "open(" in command:
             await ctx.send(embed=discord.Embed(title="Error message", color=eval(hex(ctx.author.color.value)),
                                                description="Not allowed!"))
         else:
@@ -789,22 +755,8 @@ class Media:
         language = 'en'
         word_id = word
         url = 'https://od-api.oxforddictionaries.com:443/api/v1/entries/' + language + '/' + word_id.lower()
-        r = __import__("requests").get(url, headers={'app_id': info.dict_app_id, 'app_key': info.dict_app_key})
-        definitions = {}
-        status_code = {
-            200: 'Success!',
-            400: 'The request was invalid or cannot be otherwise served.',
-            403: 'The request failed due to invalid credentials.',
-            404: 'No entry is found.',
-            500: 'Something is broken. Please contact the Oxford Dictionaries '
-                 'API team to investigate.',
-            502: 'Oxford Dictionaries API is down or being upgraded.',
-            503: 'The Oxford Dictionaries API servers are up, but overloaded '
-                 'with requests. Please try again later.',
-            504: 'The Oxford Dictionaries API servers are up, but the request '
-                 'couldn’t be serviced due to some failure within our stack. '
-                 'Please try again later.'
-        }
+        r = __import__("requests").get(url, headers={'app_id': info["dict"]["app_id"], 'app_key': info["dict"]["app_key"]})
+        definitions = {};
         if r.status_code == 200:
             for i in r.json()["results"]:
                 for j in i["lexicalEntries"]:
@@ -829,7 +781,7 @@ class Media:
             await ctx.send(embed=embed)
         else:
             embed = discord.Embed(title="An error occurred while processing your request!", colour=discord.Colour.red())
-            embed.add_field(name="Error Code {}".format(r.status_code), value=status_code[r.status_code])
+            embed.add_field(name="Error Code {}".format(r.status_code), value=info["dict"]["status_code"][r.status_code.__str__()])
             await ctx.send(embed=embed)
 
     @commands.command()
@@ -860,17 +812,17 @@ class Media:
                 ctx.author.mention + ", please choose your destination language. Can be its name or its code. Anything not detected defaults to en,English.")
             dest = await bot.wait_for('message', check=lambda x: x.author == ctx.author, timeout=60)
             await m.delete()
-            src = src.content
-            dest = dest.content
-            if src not in list(info.languages.keys()) + list(info.languages.values()):
+            src = src.content.lower()
+            dest = dest.content.lower()
+            if src not in list(info["languages"].keys()) + list(info["languages"].values()):
                 src = "auto"
-            if dest not in list(info.languages.keys()) + list(info.languages.values()):
+            if dest not in list(info["languages"].keys()) + list(info["languages"].values()):
                 dest = "en"
             async with ctx.typing():
                 translator = Translator()
                 f = translator.translate(message, dest=dest, src=src)
-                sourcelang = info.languages[f.src] + "({})".format(f.src)
-                destlang = info.languages[f.dest] + "({})".format(f.dest)
+                sourcelang = info["languages"][f.src] + "({})".format(f.src)
+                destlang = info["languages"][f.dest] + "({})".format(f.dest)
                 embed = discord.Embed(title="Translation output", colour=discord.Colour.from_rgb(79, 255, 176))
                 embed.add_field(name="Input [ {} ]:".format(sourcelang), value=f.origin, inline=False)
                 embed.add_field(name="Result [ {} ]:".format(destlang), value=f.text)
@@ -880,7 +832,6 @@ class Media:
             await ctx.send(
                 embed=discord.Embed(title="Error", description="You haven't filled up necessary data! Try again!",
                                     colour=discord.Colour.red()))
-
 
 class Images:
     '''commands dedicated to sending some image'''
@@ -975,7 +926,7 @@ class Data:
                     else:embed = discord.Embed(title="This guild's custom prefix", description=customprefix,
                                                colour=discord.Colour.dark_gold())
                 else:
-                    if ctx.author.guild_permissions.manage_guild or ctx.author.id == info.owner_id:
+                    if ctx.author.guild_permissions.manage_guild or ctx.author.id == info["hierarchy"]["owner"]:
                         await bot.db.delete(id=ctx.guild.id)
                         await bot.db.insert(id=ctx.guild.id, prefix=prefix)
                         embed = discord.Embed(title="Successfully set this guild's custom prefix!",
@@ -990,7 +941,7 @@ class Data:
                     embed = discord.Embed(title="This guild's custom prefix", description=customprefix,
                                           colour=discord.Colour.dark_gold())
                 else:
-                    if ctx.author.guild_permissions.manage_guild or ctx.author.id == info.owner_id:
+                    if ctx.author.guild_permissions.manage_guild or ctx.author.id == info["hierarchy"]["owner"]:
                         await bot.db.insert(id=ctx.guild.id, prefix=prefix)
                         embed = discord.Embed(title="Successfully set this guild's custom prefix!",
                                               description="This is the first time you're setting my custom prefix!!",
@@ -1006,7 +957,38 @@ class Beta:
     @commands.cooldown(rate=1,per=5)
     @commands.command()
     async def autorole(self,ctx,*,rolename:str=None):
-        pass
+        await ctx.send("WIP command")
+
+    @commands.group(invoke_without_subcommand=True)
+    async def special(self, ctx, id: int = None):
+        '''allows owner to make people special'''
+        await ctx.send(embed=discord.Embed(title="Available Subcommands", description="""
+            **   add**: Gives people special powers
+            **remove**: Removes special powers from people
+            """,colour=discord.Colour.blurple()))
+
+    @special.command(name="add")
+    async def special_add(self, ctx):
+        await ctx.send("WIP command")
+
+    @special.command(name="remove")
+    async def special_remove(self, ctx):
+        await ctx.send("WIP command")
+
+    @commands.group(invoke_without_command=True)
+    async def convert(self, ctx):
+        await ctx.send(embed=discord.Embed(title="Available subcommands", description="""
+            **money**: converts the currencies you want
+            ** list**: returns list of available currencies
+            """, colour=discord.Colour.blurple()))
+
+    @convert.command(name="list")
+    async def convert_list(self, ctx):
+        await ctx.send("WIP command")
+
+    @convert.command(name="money")
+    async def convert_money(self, ctx):
+        await ctx.send("WIP command")
 
 # everything from here onwards are bot events
 
@@ -1139,11 +1121,11 @@ async def on_ready():
     async def change_activities():
         timeout = 5  # Here you can change the delay between changes
         while True:
-            possb = 'Type [{}help] for help'.format(random.choice(info.prefixes))
+            possb = 'Type [{}help] for help'.format(random.choice(info["bot"]["prefixes"]))
             await bot.change_presence(activity=discord.Game(possb, status=discord.Status.dnd))
             await asyncio.sleep(timeout)
     bot.loop.create_task(change_activities())
 
 
-bot.run('Mzg0NjIzOTc4MDI4ODU5Mzky.DZecOA.rekvrUSZL8q9QVzlIlnoS0lNYVI')
+bot.run(info["bot"]["token"])
 # ok

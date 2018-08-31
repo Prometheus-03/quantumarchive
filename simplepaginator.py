@@ -128,7 +128,7 @@ class SimplePaginator:
                 self.pages.append(page)
 
         if not self.pages:
-            raise SyntaxError('There must be enough data to create at least 1 page for pagination.')
+            self.pages=[discord.Embed(title="Nothing Paginated",description="There is probably a blank output.",colour=discord.Colour.blurple())]
 
         self.eof = float(len(self.pages) - 1)
         self.controls['⏭'] = self.eof

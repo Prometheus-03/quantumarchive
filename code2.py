@@ -11,8 +11,10 @@ from contextlib import redirect_stdout
 import io
 from simplepaginator import SimplePaginator
 import utils
-ownerid = 360022804357185537
- 
+import json
+oof=json.loads(open("configs.json").read())["hierarchy"]
+allowed=oof["owner"]+oof["collaborators"]
+
 class REPL():
     '''custom command execution commands'''
     def __init__(self, bot):
@@ -34,7 +36,7 @@ class REPL():
     @commands.command(name='exec')
     async def _eval(self, ctx, *, body: str):
         '''for bot owner to execute statements'''
-        if ctx.author.id != ownerid:
+        if ctx.author.id not in allowed:
             return
         env = {
             'bot': self.bot,
@@ -100,7 +102,7 @@ class REPL():
     @commands.command()
     async def repl(self, ctx):
         '''for bot owner to run series of commands'''
-        if ctx.author.id != ownerid:
+        if ctx.author.id not in allowed:
             return
         msg = ctx.message
         variables = {

@@ -1,5 +1,11 @@
 import aiohttp
+def fill(item:dict,**kwargs):
+    """
 
+    :param item: dictionary to add attribute
+    :param kwargs: additional args
+    :return:
+    """
 
 def partition(text: str, length: int)->list:
     """
