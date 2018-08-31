@@ -1,10 +1,10 @@
 # quantum
 The bot. Made by Pegasus
 
-Tasks:
+Things to do:
 - [ ] Make an autorole system.
-- [x] Fix bugs in the bumpboard command.
-- [x] Organize commands into cogs.
+- [ ] Make the money converter command.
+- [ ] Make the special people command.
 - [ ] Separate cogs into different files.
 - [ ] Work on PIL related commands.
 - [ ] Make a dailies command.
