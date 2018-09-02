@@ -1,13 +1,16 @@
 import motor.motor_asyncio as amotor
+from json import loads as l
 import asyncio
+url=l(open("configs.json").read())['data']['url']
 class GuildDB:
     def __init__(self):
-        self.client=amotor.AsyncIOMotorClient("mongodb+srv://quantum:dZ8cy4LU7FcSsTzp@quantumpy-k5ws8.gcp.mongodb.net/test?retryWrites=true")
+        self.client=amotor.AsyncIOMotorClient(url)
         self.db=self.client['Guildstore']
         self.collections=[]
         self.collection=""
     async def add_collection(self,name:str):
         self.collections+=[name]
+        self.collections=list(set(self.collections))
         self.collection=name
         if name not in (await self.db.list_collection_names()):
             await self.db.create_collection(name=name)

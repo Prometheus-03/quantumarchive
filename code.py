@@ -18,10 +18,12 @@ import traceback
 import asyncio
 from googletrans import Translator
 import json
+
 from databasestuff import GuildDB
 from paginator import *
 from simplepaginator import SimplePaginator
 import utils
+from dbwrapper import *
 blacklisted = []
 
 info = json.loads(open("configs.json").read())
@@ -490,7 +492,7 @@ class Owner:
     async def getsource(self, ctx, command):
         '''getting the code for command'''
         people = info["hierarchy"]
-        if ctx.author.id in people["owner"]+people["collaborators"]+people["special"]:
+        if ctx.author.id in people["owner"]+people["collaborators"]+people["premium"]:
             a = inspect.getsource(bot.get_command(command).callback)
             m = len(a) // 1900
             embedlist=[]
@@ -534,7 +536,7 @@ class Pystuff():
             if i in command:
                 await ctx.send(embed=discord.Embed(title="Access Denied!",description="You are not allowed to use these.",colour=discord.Colour.red()))
                 return
-        if ctx.message.author.id not in people["owner"]+people["collaborators"]+people["special"]:
+        if ctx.message.author.id not in people["owner"]+people["collaborators"]+people["premium"]:
             await ctx.send(embed=discord.Embed(title="Error message", color=eval(hex(ctx.author.color.value)),
                                                description="Not allowed!"))
         else:
@@ -558,7 +560,8 @@ class Pystuff():
     @commands.command()
     async def pyhelp(self, ctx, *, command=None):
         '''the Python help message for a given object'''
-        if ctx.message.author.id not in people["owner"]+people["collaborators"]+people["special"] or "bot.http.token" in command or "open(" in command:
+        people=info["hierarchy"]
+        if ctx.message.author.id not in people["owner"]+people["collaborators"]+people["premium"] or "bot.http.token" in command or "open(" in command:
             await ctx.send(embed=discord.Embed(title="Error message", color=eval(hex(ctx.author.color.value)),
                                                description="Not allowed!"))
         else:
@@ -569,6 +572,7 @@ class Pystuff():
                     embeds = []
                     sio = io.StringIO()
                     with contextlib.redirect_stdout(sio):
+                        command.replace("print","")
                         help(command)
                     sio.seek(0)
                     a = sio.getvalue()
@@ -876,12 +880,14 @@ class Data:
             async with ctx.typing():
                 authorbump=await bot.db.find(author=str(ctx.author.id))
                 if len(authorbump)==0:
-                    await bot.db.insert(author=str(ctx.author.id),bumps=1)
+                    member=Member()
+                    member.load({"author":ctx.author.id,"bumps":1})
                 else:
                     currauthor=authorbump[0]
-                    currcount=currauthor["bumps"]
-                    await bot.db.delete(author=currauthor["author"])
-                    await bot.db.insert(author=str(ctx.author.id),bumps=(currcount+1))
+                    member=Member()
+                    member.load(currauthor)
+                    member.change("bumps",currauthor["bumps"]+1)
+                    await member.send()
             await ctx.send(embed=discord.Embed(title="Bumping successful!",colour=discord.Colour.dark_green()))
         else:
             async with ctx.typing():
@@ -927,8 +933,10 @@ class Data:
                                                colour=discord.Colour.dark_gold())
                 else:
                     if ctx.author.guild_permissions.manage_guild or ctx.author.id == info["hierarchy"]["owner"]:
-                        await bot.db.delete(id=ctx.guild.id)
-                        await bot.db.insert(id=ctx.guild.id, prefix=prefix)
+                        m=Guild()
+                        res["prefix"]=prefix
+                        m.load(res)
+                        await m.send()
                         embed = discord.Embed(title="Successfully set this guild's custom prefix!",
                                               colour=discord.Colour.dark_green())
                     else:
@@ -942,7 +950,9 @@ class Data:
                                           colour=discord.Colour.dark_gold())
                 else:
                     if ctx.author.guild_permissions.manage_guild or ctx.author.id == info["hierarchy"]["owner"]:
-                        await bot.db.insert(id=ctx.guild.id, prefix=prefix)
+                        m=Guild()
+                        m.load({"id":res["id"],"prefix":prefix})
+                        await m.send()
                         embed = discord.Embed(title="Successfully set this guild's custom prefix!",
                                               description="This is the first time you're setting my custom prefix!!",
                                               colour=discord.Colour.dark_green())
@@ -954,25 +964,59 @@ class Data:
 
 class Beta:
     '''for commands in testing'''
-    @commands.cooldown(rate=1,per=5)
-    @commands.command()
-    async def autorole(self,ctx,*,rolename:str=None):
-        await ctx.send("WIP command")
+    @commands.group(invoke_without_subcommand=True)
+    async def autorole(self,ctx):
+        '''allows owner to automatically give role to members'''
+        await ctx.send(embed=discord.Embed(title="Available Subcommands", description="""
+                    **set**: sets the current guild's autorole
+                    **get**: gets the current guild's autorole
+                    """, colour=discord.Colour.blurple()))
+
+    @commands.cooldown(rate=1,per=5,type=commands.BucketType.guild)
+    @autorole.command(name="set")
+    async def autorole_set(self,ctx,*,rolename:str=None):
+        '''sets the autorole of this guild, case sensitivity does not matter'''
+        bot.db.set_collection("guilds")
+        serverroles=ctx.guild.role_hierarchy[:-1]
+        rolenames=list(map(lambda x:x.name,serverroles))
+        serveroles=list(map(lambda x:x.lower(),rolenames))
+        if rolename in serveroles:
+            role=rolenames[serveroles.index(rolename)]
+            guild=Guild()
+            currguild=await bot.db.find(length=1,id=ctx.guild.id)
+            if currguild:
+                guild.load(currguild[0])
+            else:
+                guild.load({"id":ctx.guild.id})
+            guild.change("autorole",role)
+            await guild.send()
+            await ctx.send(embed=discord.Embed(title="Autorole configured",description='Your autorole is set as: {}'.format(role),colour=discord.Colour.green()))
+        else:
+            await ctx.send(embed=discord.Embed(title="Autorole configuration failed",description="The role specified is either not found, or you have no permissions to modify.",colour=discord.Colour.red()))
+
+    @commands.cooldown(rate=1,per=5,type=commands.BucketType.guild)
+    @autorole.command(name="get")
+    async def autorole_get(selfself,ctx):
+        '''gets the autorole of this guild'''
+        currguild=await bot.db.find(length=1,id=ctx.guild.id)
+        if currguild:name=currguild[0]["autorole"]
+        else:name="Not set yet"
+        await ctx.send(embed=discord.Embed(title="The autorole of this server",description=name))
 
     @commands.group(invoke_without_subcommand=True)
-    async def special(self, ctx, id: int = None):
-        '''allows owner to make people special'''
+    async def premium(self, ctx, id: int = None):
+        '''allows owner to give people premium membership'''
         await ctx.send(embed=discord.Embed(title="Available Subcommands", description="""
             **   add**: Gives people special powers
             **remove**: Removes special powers from people
             """,colour=discord.Colour.blurple()))
 
-    @special.command(name="add")
-    async def special_add(self, ctx):
+    @premium.command(name="add")
+    async def premium_add(self, ctx):
         await ctx.send("WIP command")
 
-    @special.command(name="remove")
-    async def special_remove(self, ctx):
+    @premium.command(name="remove")
+    async def premium_remove(self, ctx):
         await ctx.send("WIP command")
 
     @commands.group(invoke_without_command=True)
@@ -1012,7 +1056,13 @@ async def on_member_join(member):
         embed.add_field(name="Member count", value=len(member.guild.members))
         embed.add_field(name="Bot", value=member.bot)
         await member.guild.get_channel(470431623079264258).send(embed=embed)
-
+    bot.db.set_collection("guilds")
+    m=await bot.db.find(length=1,id=member.guild.id)
+    if m:
+        m=m[0]
+        f=m["autorole"]
+        role=discord.utils.get(member.guild.roles,name=f)
+        await member.add_roles(role)
 
 @bot.event
 async def on_member_remove(member):
