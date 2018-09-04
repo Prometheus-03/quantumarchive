@@ -996,12 +996,29 @@ class Beta:
 
     @commands.cooldown(rate=1,per=5,type=commands.BucketType.guild)
     @autorole.command(name="get")
-    async def autorole_get(selfself,ctx):
+    async def autorole_get(self,ctx):
         '''gets the autorole of this guild'''
         currguild=await bot.db.find(length=1,id=ctx.guild.id)
         if currguild:name=currguild[0]["autorole"]
         else:name="Not set yet"
         await ctx.send(embed=discord.Embed(title="The autorole of this server",description=name))
+
+    @commands.cooldown(rate=1,per=5,type=commands.BucketType.guild)
+    @autorole.command(name="remove")
+    async def autorole_remove(self,ctx):
+        '''remove the option of using autorole'''
+        currguild=await bot.db.find(length=1,id=ctx.guild.id)
+        if currguild:
+            name=currguild[0]
+            name.pop("autorole",None)
+            m=Guild()
+            m.load(name)
+            await m.send()
+            await ctx.send(embed=discord.Embed(title="Success",description="Autorole removed!",colour=discord.Color.green()))
+        else:
+            await ctx.send(embed=discord.Embed(title="Just to let you know",description="There was no autorole in the first place."
+                                               ,colour=discord.Colour.red()))
+
 
     @commands.group(invoke_without_subcommand=True)
     async def premium(self, ctx, id: int = None):
