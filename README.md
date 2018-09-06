@@ -2,7 +2,6 @@
 The bot. Made by Pegasus
 
 Things to do:
-- [ ] Make an autorole system.
 - [ ] Make the money converter command.
 - [ ] Make the special people command.
 - [ ] Separate cogs into different files.
