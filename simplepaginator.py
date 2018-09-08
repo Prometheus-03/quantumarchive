@@ -36,13 +36,12 @@ class SimplePaginator:
         self.previous = 0
         self.eof = 0
 
-        self.controls = {'⏮': 0.0, '◀': -1, '⏹': 'stop',
-                         '▶': +1, '⏭': None, }
+        self.controls = {'⏮': 0.0, '◀': -1, '⏹': 'stop', '\u274c': 'delete',
+                         '▶': +1, '⏭': None }
 
     async def indexer(self, ctx, ctrl):
-        if ctrl == 'stop':
-            ctx.bot.loop.create_task(self.stop_controller(self.base))
-
+        if ctrl in 'stopdelete':
+            ctx.bot.loop.create_task(self.stop_controller(self.base,int(ctrl=="stop")))
         elif isinstance(ctrl, int):
             self.current += ctrl
             if self.current > self.eof or self.current < 0:
@@ -58,6 +57,8 @@ class SimplePaginator:
 
         if len(self.pages) == 1:
             await self.base.add_reaction('⏹')
+            await self.base.add_reaction('\u274c')
+
         else:
             for reaction in self.controls:
                 try:
@@ -98,11 +99,17 @@ class SimplePaginator:
             except KeyError:
                 pass
 
-    async def stop_controller(self, message):
-        try:
-            await message.clear_reactions()
-        except discord.HTTPException:
-            pass
+    async def stop_controller(self, message, status):
+        if status==1:
+            try:
+                await message.clear_reactions()
+            except discord.HTTPException:
+                pass
+        elif status==0:
+            try:
+                await message.delete()
+            except discord.HTTPException:
+                pass
 
         try:
             self.controller.cancel()

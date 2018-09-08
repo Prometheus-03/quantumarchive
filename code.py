@@ -1033,14 +1033,11 @@ class Beta:
     async def premium_add(self, ctx, member:discord.Member):
         if ctx.author.id in info["hierarchy"]["owner"]:
             bot.db.set_collection("bumps")
-            print(member.id)
             m=await bot.db.find(length=1,author=member.id)
-            print(m)
             if m:
                 f=Member()
                 f.load(m[0])
                 f.change("premium",True)
-                print(f)
                 await f.send()
             else:
                 f=Member()
@@ -1082,7 +1079,8 @@ class Beta:
 
     @convert.command(name="list")
     async def convert_list(self, ctx):
-        await ctx.send("WIP command")
+        m=info["converter"]["symbols"]
+
 
     @convert.command(name="money")
     async def convert_money(self, ctx):
