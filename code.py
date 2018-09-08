@@ -1044,7 +1044,7 @@ class Beta:
                 await f.send()
             else:
                 f=Member()
-                f.load({"premium":True,"id":member.id})
+                f.load({"premium":True,"author":member.id})
                 await f.send()
             await ctx.send("Member has been given premium membership!",delete_after=3)
         else:
