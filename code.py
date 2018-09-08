@@ -964,7 +964,7 @@ class Data:
 
 class Beta:
     '''for commands in testing'''
-    @commands.group(invoke_without_subcommand=True)
+    @commands.group(invoke_without_command=True)
     async def autorole(self,ctx):
         '''allows owner to automatically give role to members'''
         await ctx.send(embed=discord.Embed(title="Available Subcommands", description="""
@@ -1020,21 +1020,58 @@ class Beta:
                                                ,colour=discord.Colour.red()))
 
 
-    @commands.group(invoke_without_subcommand=True)
-    async def premium(self, ctx, id: int = None):
+    @commands.group(invoke_without_command=True)
+    async def premium(self, ctx):
         '''allows owner to give people premium membership'''
         await ctx.send(embed=discord.Embed(title="Available Subcommands", description="""
             **   add**: Gives people special powers
             **remove**: Removes special powers from people
+            ** count**: Counts how many people use premium membership
             """,colour=discord.Colour.blurple()))
 
     @premium.command(name="add")
-    async def premium_add(self, ctx):
-        await ctx.send("WIP command")
+    async def premium_add(self, ctx, member:discord.Member):
+        if ctx.author.id in info["hierarchy"]["owner"]:
+            bot.db.set_collection("bumps")
+            print(member.id)
+            m=await bot.db.find(length=1,author=member.id)
+            print(m)
+            if m:
+                f=Member()
+                f.load(m[0])
+                f.change("premium",True)
+                print(f)
+                await f.send()
+            else:
+                f=Member()
+                f.load({"premium":True,"id":member.id})
+                await f.send()
+            await ctx.send("Member has been given premium membership!",delete_after=3)
+        else:
+            await ctx.send("You have no authority to give premium membership.",delete_after=3)
 
     @premium.command(name="remove")
-    async def premium_remove(self, ctx):
-        await ctx.send("WIP command")
+    async def premium_remove(self, ctx, member:discord.Member):
+        if ctx.author.id in info["hierarchy"]["owner"]:
+            bot.db.set_collection("bumps")
+            m=await bot.db.find(length=1,author=member.id)
+            if m:
+                f=Member()
+                f.load(m[0])
+                f.change("premium",False)
+                await f.send()
+            else:
+                f=Member()
+                f.load({"premium":False,"id":member.id})
+                await f.send()
+            await ctx.send("Member does not have premium membership!",delete_after=3)
+        else:
+            await ctx.send("You have no authority to remove premium membership.",delete_after=3)
+    @premium.command(name="count")
+    async def premium_count(self,ctx):
+        bot.db.set_collection("bumps")
+        m=await bot.db.find(length=1000,premium=True)
+        await ctx.send(embed=discord.Embed(title="Number of people who use premium",description=str(len(m)),colour=discord.Colour.dark_blue()))
 
     @commands.group(invoke_without_command=True)
     async def convert(self, ctx):

@@ -53,12 +53,12 @@ class Member:
         elif attribute == "bumps":
             self.prefix = newval
         elif attribute == "premium":
-            self.autorole = newval
+            self.premium = newval
 
     async def send(self):
         await self.db.add_collection("bumps")
         await self.db.delete(author=self.author)
-        await self.db.insert(author=self.author,bumps=self.prefix,premium=self.premium)
+        await self.db.insert(author=self.author,bumps=self.bumps,premium=self.premium)
 
     def __str__(self):
         return ("<Member author={},bump count={},premium={}>".format(self.author,self.bumps,self.premium))
