@@ -40,7 +40,7 @@ class SimplePaginator:
                          '▶': +1, '⏭': None }
 
     async def indexer(self, ctx, ctrl):
-        if ctrl in 'stopdelete':
+        if str(ctrl) in 'stopdelete':
             ctx.bot.loop.create_task(self.stop_controller(self.base,int(ctrl=="stop")))
         elif isinstance(ctrl, int):
             self.current += ctrl
@@ -99,7 +99,7 @@ class SimplePaginator:
             except KeyError:
                 pass
 
-    async def stop_controller(self, message, status):
+    async def stop_controller(self, message, status=1):
         if status==1:
             try:
                 await message.clear_reactions()
