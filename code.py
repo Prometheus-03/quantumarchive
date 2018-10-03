@@ -22,7 +22,7 @@ import json
 from databasestuff import GuildDB
 from paginator import *
 from simplepaginator import SimplePaginator
-import utils
+import quantumutils as utils
 from dbwrapper import *
 blacklisted = []
 
@@ -38,6 +38,8 @@ async def getprefix(bot,message:discord.Member):
 bot = commands.Bot(description='Tune in to lots of fun with this bot!',
                    command_prefix=getprefix)
 bot.db=GuildDB()
+premium_embed=discord.Embed(title="This is a Premium feature.",description="In order to use this feature, please consider buying **Quantum Bot premium**. It's very cheap, at USD0.80 per month!",
+                            colour=discord.Colour.dark_blue(),footer="Type \"q!premium buy\" for more info.")
 
 class MemberInThisGuild(commands.Converter):
     async def convert(self, ctx, argument):
@@ -505,9 +507,7 @@ class Owner:
                                                colour=discord.Colour.dark_gold()))
             await SimplePaginator(extras=embedlist).paginate(ctx)
         else:
-            await ctx.send(embed=discord.Embed(title="Access denied!",
-                                               description="This command can only be used by the bot owner!",
-                                               colour=discord.Colour.red()))
+            await ctx.send(embed=premium_embed)
 
     @commands.command(pass_context=True)
     async def warn(self, ctx, member: discord.Member, serious: bool, *, reason):
@@ -537,8 +537,7 @@ class Pystuff():
                 await ctx.send(embed=discord.Embed(title="Access Denied!",description="You are not allowed to use these.",colour=discord.Colour.red()))
                 return
         if ctx.message.author.id not in people["owner"]+people["collaborators"]+people["premium"]:
-            await ctx.send(embed=discord.Embed(title="Error message", color=eval(hex(ctx.author.color.value)),
-                                               description="Not allowed!"))
+            await ctx.send(embed=premium_embed)
         else:
             if command is None:
                 await ctx.send("Argument [command name] must be provided!")
@@ -562,8 +561,7 @@ class Pystuff():
         '''the Python help message for a given object'''
         people=info["hierarchy"]
         if ctx.message.author.id not in people["owner"]+people["collaborators"]+people["premium"] or "bot.http.token" in command or "open(" in command:
-            await ctx.send(embed=discord.Embed(title="Error message", color=eval(hex(ctx.author.color.value)),
-                                               description="Not allowed!"))
+            await ctx.send(embed=premium_embed)
         else:
             if command is None:
                 await ctx.send("Argument [command name] must be provided!")
@@ -1064,11 +1062,16 @@ class Beta:
             await ctx.send("Member does not have premium membership!",delete_after=3)
         else:
             await ctx.send("You have no authority to remove premium membership.",delete_after=3)
+
     @premium.command(name="count")
     async def premium_count(self,ctx):
         bot.db.set_collection("bumps")
         m=await bot.db.find(length=1000,premium=True)
         await ctx.send(embed=discord.Embed(title="Number of people who use premium",description=str(len(m)),colour=discord.Colour.dark_blue()))
+
+    @premium.command(name="buy")
+    async def premium_buy(self,ctx):
+        await ctx.send(embed=discord.Embed(title="Buying premium membership",description="So you want to get better access to premium features? For just USD0.80, you can get access to awesome features! But now [here](https://paypal.me/darkangelSG)",colour=discord.Colour.dark_gold()))
 
     @commands.group(invoke_without_command=True)
     async def convert(self, ctx):
@@ -1079,12 +1082,33 @@ class Beta:
 
     @convert.command(name="list")
     async def convert_list(self, ctx):
+        """returns list of available currencies"""
         m=info["converter"]["symbols"]
+        await SimplePaginator(entries=["{} : {}".format(i,m[i]) for i in m.keys()],title="List of available currencies",length=20,footer="Powered by fixer.io",colour=0xff9a16).paginate(ctx)
 
-
+    @commands.cooldown(rate=1,per=5)
     @convert.command(name="money")
-    async def convert_money(self, ctx):
-        await ctx.send("WIP command")
+    async def convert_money(self, ctx, value:int, from_val:str, to_val:str):
+        """converts the currencies you want"""
+        if ctx.author.id in info["hierarchy"]["premium"]+info["hierarchy"]["collaborators"]+info["hierarchy"]["owner"]:
+            value=abs(value)
+            if from_val.upper() not in info["converter"]["symbols"].keys() or to_val.upper() not in info["converter"]["symbols"]:
+                await ctx.send(embed=discord.Embed(title="Currency not found",description="Type `Q!convert list` to see all available currencies.",colour=discord.Colour.red()))
+            else:
+                res=await utils.getjson("http://data.fixer.io/api/convert?access_key={}&from={}&to={}&amount={}".format(info["converter"]["access_key"],from_val,to_val,value))
+                print(res)
+                if res["success"]:
+                    rate=res["info"]["rate"]
+                    val =res["result"]
+                    embed=discord.Embed(title="Currency Conversion Result",colour=discord.Colour.dark_gold())
+                    embed.add_field(name=from_val,value=str(value))
+                    embed.add_field(name=to_val,value=str(val),inline=False)
+                    embed.add_field(name="Current Conversion Rate",value="1{} = {}{}".format(from_val,rate,to_val))
+                    await ctx.send(embed=embed)
+                else:
+                    await ctx.send("Sorry {} but the service is currently unavailable.".format(ctx.author.mention))
+        else:
+            await ctx.send(embed=premium_embed)
 
 # everything from here onwards are bot events
 
@@ -1218,6 +1242,9 @@ async def on_ready():
         await f.send(embed=discord.Embed(title="Bot Updated on:",
                                          description=f"{datetime.datetime.utcnow(): %B %d, %Y at %H:%M:%S GMT}",
                                          colour=discord.Colour.dark_gold()))
+    bot.db.set_collection("bumps")
+    m = await bot.db.find(length=1000, premium=True)
+    info["hierarchy"]["premium"] = [i["author"] for i in m]
     print("Bot works, go on.")
 
     async def change_activities():
