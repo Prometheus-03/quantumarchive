@@ -10,7 +10,7 @@ import textwrap
 from contextlib import redirect_stdout
 import io
 from simplepaginator import SimplePaginator
-import utils
+import quantumutils as utils
 import json
 oof=json.loads(open("configs.json").read())["hierarchy"]
 allowed=oof["owner"]+oof["collaborators"]
