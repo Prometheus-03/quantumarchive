@@ -1,5 +1,6 @@
 #!/usr/bin/env python3.7
 # -*- coding: utf-8 -*-
+from gtts import *
 from discord.ext import commands
 import urllib.request
 import urllib.parse
@@ -15,7 +16,6 @@ import re
 import io
 import contextlib
 import traceback
-import asyncio
 from googletrans import Translator
 import json
 
@@ -462,6 +462,22 @@ class Fun:
             embed.set_thumbnail(url=ctx.guild.get_member(info["hierarchy"]["bot"]).avatar_url)
         await ctx.send(embed=embed)
 
+    @commands.group(invoke_without_subcommand=True)
+    async def tts(self,ctx,*,text:str):
+        '''a group of commands that lets you get a speech output'''
+        await ctx.send("This command will be under works. Use Q!tts say for the main command", tts=True)
+
+    @tts.command(name="say")
+    async def tts_say(self,ctx,*,text:str):
+        '''Allows you'''
+        file = gTTS(text)
+        file.save("Extras/gtts.mp3")
+        await ctx.send(file=discord.File("Extras/gtts.mp3"))
+
+    @tts.command(name="info")
+    async def tts_info(self,ctx):
+        '''provides more information on how to use this elaborate command'''
+        await ctx.send("Pending")
 
 class Owner:
     '''commands only the bot owner can use, besides repl and exec'''
@@ -1172,7 +1188,8 @@ async def on_raw_reaction_add(reaction):
 
 @bot.event
 async def on_command(ctx):
-    if ctx.command.name not in "execrepl":print("Invocation of "+ctx.command.name+" by "+ctx.author.name)
+    if ctx.command.name not in "execrepl":
+        print("Invocation of "+ctx.command.name+" by "+ctx.author.name)
 
 @bot.event
 async def on_command_error(ctx, error):

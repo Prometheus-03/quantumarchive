@@ -3,3 +3,4 @@ requests
 googletrans
 motor
 dnspython
+gtts
