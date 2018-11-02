@@ -795,7 +795,7 @@ class Media:
         word_id = word
         url = 'https://od-api.oxforddictionaries.com:443/api/v1/entries/' + language + '/' + word_id.lower()
         r = __import__("requests").get(url, headers={'app_id': info["dict"]["app_id"], 'app_key': info["dict"]["app_key"]})
-        definitions = {};
+        definitions = {}
         if r.status_code == 200:
             for i in r.json()["results"]:
                 for j in i["lexicalEntries"]:
@@ -906,49 +906,6 @@ class Images:
 
 class Data:
     '''these commands store data'''
-    @commands.cooldown(rate=1,per=5)
-    @commands.command()
-    async def bump(self,ctx,member:discord.Member=None):
-        '''bump Quantum Bot up, see your bump statistics'''
-        bot.db.set_collection("bumps")
-        if member is None and not ctx.author.bot:
-            async with ctx.typing():
-                authorbump=await bot.db.find(author=str(ctx.author.id))
-                if len(authorbump)==0:
-                    member=Member()
-                    member.load({"author":ctx.author.id,"bumps":1})
-                else:
-                    currauthor=authorbump[0]
-                    member=Member()
-                    member.load(currauthor)
-                    member.change("bumps",currauthor["bumps"]+1)
-                    await member.send()
-            await ctx.send(embed=discord.Embed(title="Bumping successful!",colour=discord.Colour.dark_green()))
-        else:
-            async with ctx.typing():
-                member_ent=await bot.db.find(author=str(member.id))
-                if len(member_ent)==0:
-                    num="0"
-                else:
-                    num=str(member_ent[0]["bumps"])
-            await ctx.send(embed=discord.Embed(title=f"Number of times {member.display_name} bumped",description=num,colour=discord.Colour.blue()))
-
-    @commands.cooldown(rate=1, per=5)
-    @commands.command()
-    async def bumpboard(self, ctx):
-        '''to see the top 10 bumps leaderboard'''
-        async with ctx.typing():
-            bot.db.set_collection("bumps")
-            people = await bot.db.find(length=10)
-            people.sort(key=lambda x: x["bumps"], reverse=True)
-            count = 0
-            sendembed = discord.Embed(title="Bump Leaderboards", colour=discord.Colour.darker_grey())
-            for person in people:
-                count += 1
-                sendembed.add_field(name="#%d, with %d bumps" % (count, person["bumps"]),
-                                value=discord.utils.get(bot.users, id=int(person["author"])))
-        await ctx.send(embed=sendembed)
-
     @commands.cooldown(rate=1, per=5)
     @commands.command()
     async def customprefix(self, ctx, prefix: str = None):
