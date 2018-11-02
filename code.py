@@ -1,6 +1,7 @@
 #!/usr/bin/env python3.7
 # -*- coding: utf-8 -*-
-from gtts import *
+import gtts
+import gtts.lang
 from discord.ext import commands
 import urllib.request
 import urllib.parse
@@ -463,21 +464,41 @@ class Fun:
         await ctx.send(embed=embed)
 
     @commands.group(invoke_without_subcommand=True)
-    async def tts(self,ctx,*,text:str):
+    async def tts(self,ctx):
         '''a group of commands that lets you get a speech output'''
-        await ctx.send("This command will be under works. Use Q!tts say for the main command", tts=True)
+        await ctx.send(embed=discord.Embed(title="Available Subcommands", description="""
+                    **   say**: Returns an audio file with the spoken words. Default language is English
+                    ** langs**: Returns the list of supported languages and their codes
+                    """, colour=discord.Colour.blurple()))
 
     @tts.command(name="say")
-    async def tts_say(self,ctx,*,text:str):
-        '''Allows you'''
-        file = gTTS(text)
+    async def tts_say(self,ctx,speaking_language:str=None,*,text:str=None):
+        '''Returns an audio file with the spoken words. Default language is English'''
+        if speaking_language in gtts.lang.tts_langs():
+            file = gtts.gTTS(text,lang=speaking_language)
+        else:
+            if text==None:
+                if speaking_language==None:
+                    speaking_language="Please"
+                    text="input a language"
+                else:
+                    text=""
+            file = gtts.gTTS(speaking_language+" "+text)
         file.save("Extras/gtts.mp3")
         await ctx.send(file=discord.File("Extras/gtts.mp3"))
 
-    @tts.command(name="info")
-    async def tts_info(self,ctx):
-        '''provides more information on how to use this elaborate command'''
-        await ctx.send("Pending")
+    @tts.command(name="langs")
+    async def tts_langs(self,ctx):
+        '''shows list of supported languages and their codes'''
+        langs=[]
+        for key in gtts.lang.tts_langs():
+            langs.append("**%5s**"%key+": "+gtts.lang.tts_langs()[key])
+        embeds=[]
+        for i in range(len(langs)//15):
+            embeds.append(discord.Embed(title="List of available languages [{}/5]".format(i+1),
+                                        description="\n".join(langs[15*i:15*(i+1)]),
+                                        colour=discord.Colour.blurple()))
+        await SimplePaginator(extras=embeds).paginate(ctx)
 
 class Owner:
     '''commands only the bot owner can use, besides repl and exec'''
