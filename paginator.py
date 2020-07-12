@@ -46,10 +46,10 @@ class Pages:
         self.reaction_emojis = [
             ('\N{BLACK LEFT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR}', self.first_page),
             ('\N{BLACK LEFT-POINTING TRIANGLE}', self.previous_page),
+            ('\N{BLACK SQUARE FOR STOP}', self.stop_pages),
             ('\N{BLACK RIGHT-POINTING TRIANGLE}', self.next_page),
             ('\N{BLACK RIGHT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR}', self.last_page),
             ('\N{INPUT SYMBOL FOR NUMBERS}', self.numbered_page ),
-            ('\N{BLACK SQUARE FOR STOP}', self.stop_pages),
             ('\N{INFORMATION SOURCE}', self.show_help),
         ]
 
@@ -188,7 +188,7 @@ class Pages:
 
     async def stop_pages(self):
         """stops the interactive pagination session"""
-        await self.message.delete()
+        await self.message.clear_reactions()
         self.paginating = False
 
     def react_check(self, reaction, user):
@@ -300,7 +300,7 @@ def _command_signature(cmd):
     # this is modified from discord.py source
     # which I wrote myself lmao
 
-    result = [cmd.qualified_name]
+    result = [" | ".join([cmd.qualified_name,*cmd.aliases])]
     if cmd.usage:
         result.append(cmd.usage)
         return ' '.join(result)
@@ -336,7 +336,7 @@ class HelpPaginator(Pages):
         cog_name = cog.__class__.__name__
 
         # get the commands
-        entries = sorted(ctx.bot.get_cog_commands(cog_name), key=lambda c: c.name)
+        entries = sorted(ctx.bot.get_cog(cog_name).get_commands(), key=lambda c: c.name)
 
         # remove the ones we can't run
         entries = [cmd for cmd in entries if (await _can_run(cmd, ctx)) and not cmd.hidden]
@@ -358,8 +358,7 @@ class HelpPaginator(Pages):
             entries = [cmd for cmd in entries if (await _can_run(cmd, ctx)) and not cmd.hidden]
 
         self = cls(ctx, entries)
-        self.title = command.signature
-
+        self.title = _command_signature(command)
         if command.description:
             self.description = f'{command.description}\n\n{command.help}'
         else:
@@ -473,6 +472,7 @@ class HelpPaginator(Pages):
         self.embed.clear_fields()
 
         entries = (
+            ('name1 | name2', 'This means that the command has multiple valid names.'),
             ('<argument>', 'This means the argument is __**required**__.'),
             ('[argument]', 'This means the argument is __**optional**__.'),
             ('[A|B]', 'This means the it can be __**either A or B**__.'),

@@ -1,64 +1,59 @@
-from databasestuff import GuildDB
-class Guild:
-    def __init__(self):
-        self.id=None
-        self.prefix=None
-        self.autorole=None
-        self.db=GuildDB()
-
-    def load(self,data:dict):
-        self.db.set_collection("guilds")
-        for attribute in data.keys():
-            if attribute == "id":
-                self.id = data["id"]
-            elif attribute == "prefix":
-                self.prefix = data["prefix"]
-            elif attribute == "autorole":
-                self.autorole = data["autorole"]
-
-    def change(self,attribute:str,newval):
-        if attribute=="prefix":
-            self.prefix=newval
-        elif attribute=="autorole":
-            self.autorole=newval
-
-    async def send(self):
-        await self.db.add_collection("guilds")
-        await self.db.delete(id=self.id)
-        await self.db.insert(id=self.id,prefix=self.prefix,autorole=self.autorole)
-
-    def __str__(self):
-        return ("<Guild id={},prefix={},autorole={}>".format(self.id,self.prefix,self.autorole))
-
-class Member:
-    def __init__(self):
-        self.author=None
-        self.bumps=0
-        self.premium=False
-        self.db=GuildDB()
-
-    def load(self,data:dict):
-        self.db.set_collection("bumps")
-        for attribute in data.keys():
-            if attribute == "author":
-                self.author = data["author"]
-            elif attribute == "bumps":
-                self.prefix = data["bumps"]
-            elif attribute == "premium":
-                self.autorole = data["premium"]
-
-    def change(self,attribute:str,newval):
-        if attribute == "author":
-            self.author = newval
-        elif attribute == "bumps":
-            self.prefix = newval
-        elif attribute == "premium":
-            self.premium = newval
-
-    async def send(self):
-        await self.db.add_collection("bumps")
-        await self.db.delete(author=self.author)
-        await self.db.insert(author=self.author,bumps=self.bumps,premium=self.premium)
-
-    def __str__(self):
-        return ("<Member author={},bump count={},premium={}>".format(self.author,self.bumps,self.premium))
+import motor.motor_asyncio as amotor
+import asyncio
+url = "mongodb+srv://quantum:VgRD1mkUCoOokZQ9@khanub0t.k5ws8.gcp.mongodb.net/KhAnuB0t?retryWrites=true&w=majority"
+class DB:
+    def __init__(self,db):
+        self.client=amotor.AsyncIOMotorClient(url)
+        self.db=self.client[db]
+        self.collections=[]
+        self.collection=""
+    async def add_collection(self,name:str):
+        self.collections+=[name]
+        self.collections=list(set(self.collections))
+        self.collection=name
+        if name not in (await self.db.list_collection_names()):
+            await self.db.create_collection(name=name)
+    async def remove_collection(self,name:str):
+        self.collections.remove(name)
+        await self.db.drop_collection(name)
+    def set_collection(self,name:str):
+        self.collection=name
+    async def insert(self,**kwargs):
+        await self.db[self.collection].insert_one(kwargs)
+    async def insert_many(self,*items):
+        for i in items:
+            await self.insert(**i)
+    async def delete(self,**kwargs):
+        await self.db[self.collection].delete_many(kwargs)
+    async def find(self,length=1000,**kwargs):
+        cursor=self.db[self.collection].find(kwargs)
+        res=[]
+        for doc in await cursor.to_list(length=length):
+            doc.setdefault("")
+            res.append(doc)
+        return res
+    async def insertnorepeat(self,**kwargs):
+        if not (await self.find(**kwargs)):
+            await self.insert(**kwargs)
+    async def update(self,objid,**kwargs):
+        await self.db[self.collection].update_one({"_id":objid},{"$set":kwargs})
+    async def print_db(self):
+        res=[]
+        for i in (await self.find()):
+            temp=[]
+            for x in i.keys():
+                if i!="_id":temp+=[x+":"+str(i[x])]
+            res+=[",".join(temp)]
+        return "\n".join(res)
+'''
+async def main():
+    db=DB()
+    await db.add_collection("guilds")
+    await db.insert(name="Test",content="woop")
+    await db.insert_many({"name":"lol","content":"testing"},{"name":"lol","content":"testing"})
+    #await db.delete()
+    m=await db.print_db()
+    print(m)
+if __name__=="__main__":
+    asyncio.get_event_loop().run_until_complete(main())
+'''
